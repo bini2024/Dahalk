@@ -1,143 +1,830 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    
-    <title>Dahlak Business Group</title>
+    <title>Professional Payout Bingo</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f2f2f2;
-            background-image: url('Dahlak.jpg'); /* Add your image URL here */
-            background-size: contain;
-            background-repeat:no-repeat;
-            background-position: center;
-            opacity: 0.5; /* Adjust opacity as needed */
-        }
-        .container {
-            max-width: 600px;
-            margin: 50px auto;
-            padding: 20px;
-            background-color: rgba(255, 255, 255, 0.7); /* Background color with opacity */
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-        h1 {
-            text-align: center;
-            margin-bottom: 30px;
+            font-family: sans-serif;
+            margin: 20px;
+            background-color: #f4f4f4;
             color: #333;
-        }
-        form {
-            text-align: center;
-        }
-        label {
-            display: block;
-            margin-bottom: 10px;
-            font-weight: bold;
-            color: #333;
-        }
-        input[type="text"],
-        input[type="date"],
-        input[type="number"],
-        select,
-        button {
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 20px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            box-sizing: border-box;
-        }
-        button {
-            background-color: #d9534f;
-            color: #fff;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-        }
-        button:hover {
-            background-color: #c9302c;
-        }
-        #flightsContainer {
-            margin-top: 30px;
-        }
-        .flight-card {
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            padding: 15px;
-            margin-bottom: 15px;
-            background-color: #f9f9f9;
-            transition: transform 0.3s ease;
-        }
-        .flight-info {
-            font-size: 16px;
-            margin-bottom: 10px;
-            color: #333;
-        }
-        .flight-info strong {
-            color: #d9534f;
+            line-height: 1.6;
         }
 
-        /* Responsive styles */
-        @media (max-width: 600px) {
-            .container {
-                width: 90%;
-            }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 20px 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
+
+        h1, h2, h3 {
+            color: #0056b3;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+         h3 {
+            color: #555;
+            margin-top: 25px;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 5px;
+         }
+
+
+        .game-view {
+            display: none; /* Managed by JavaScript */
+        }
+
+        #lobby-view, #game-view, #bingo-view {
+             /* Styles specific to each view if needed */
+        }
+
+        #financialInfo, #gameFinancialInfo {
+            background-color: #e9ecef;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            border-left: 5px solid #007bff;
+        }
+        #financialInfo p, #gameFinancialInfo p {
+            margin: 5px 0;
+        }
+
+        #currentNumberDisplay {
+            font-size: 4em;
+            font-weight: bold;
+            text-align: center;
+            margin: 30px 0;
+            color: #28a745;
+            padding: 15px;
+            border: 2px dashed #28a745;
+            border-radius: 8px;
+            background-color: #e2f0cb;
+        }
+
+        #calledNumbersList {
+            margin-top: 20px;
+            padding: 15px;
+            border: 1px solid #ccc;
+            max-height: 150px;
+            overflow-y: auto;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+        }
+        #calledNumbersList strong {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+        }
+
+        button {
+            display: inline-block;
+            padding: 10px 20px;
+            margin: 10px 5px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            font-size: 1em;
+            transition: background-color 0.3s ease;
+        }
+
+        #joinGameBtn { background-color: #28a745; color: white; }
+        #joinGameBtn:hover { background-color: #218838; }
+
+        #startGameBtn { background-color: #007bff; color: white; }
+        #startGameBtn:hover:not(:disabled) { background-color: #0056b3; }
+
+        #callNumberBtn { background-color: #ffc107; color: #333; }
+        #callNumberBtn:hover:not(:disabled) { background-color: #e0a800; }
+
+        #bingoBtn { background-color: #dc3545; color: white; }
+        #bingoBtn:hover:not(:disabled) { background-color: #c82333; }
+
+        #newGameBtn { background-color: #17a2b8; color: white; }
+        #newGameBtn:hover:not(:disabled) { background-color: #138496; }
+
+        .approve-btn { background-color: #28a745; color: white; padding: 5px 10px; font-size: 0.8em; margin-left: 10px;}
+        .reject-btn { background-color: #dc3545; color: white; padding: 5px 10px; font-size: 0.8em; margin-left: 5px;}
+        .approve-btn:hover { background-color: #218838; }
+        .reject-btn:hover { background-color: #c82333; }
+
+
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        input[type="text"] {
+            padding: 10px;
+            margin-right: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 1em;
+        }
+
+        #waitingPlayerList div, #approvedPlayerList div {
+            margin: 8px 0;
+            padding: 8px;
+            background-color: #f8f9fa;
+            border-radius: 3px;
+            display: flex; /* Use flexbox for layout */
+            justify-content: space-between; /* Push name and buttons apart */
+            align-items: center;
+             word-break: break-word; /* Prevent long names breaking layout */
+        }
+         #waitingPlayerList div span, #approvedPlayerList div span {
+             flex-grow: 1; /* Allow name to take up space */
+             margin-right: 10px; /* Spacing between name and buttons */
+         }
+
+
+        .disclaimer {
+            font-size: 0.9em;
+            color: #6c757d;
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px dashed #6c757d;
+            border-radius: 5px;
+            text-align: center;
+        }
+
+        #bingoWinnerName {
+            font-weight: bold;
+            color: #28a745;
+        }
+
+        #waitingMessage {
+            text-align: center;
+            font-size: 1.2em;
+            color: #ff9800;
+            margin-top: 20px;
+            padding: 15px;
+            border: 1px dashed #ff9800;
+            border-radius: 5px;
+            background-color: #fff3e0;
+        }
+
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Welcome to Dahlak Business Group</h1>
-        <form id="flightSearchForm">
-            <label for="origin">Origin:</label>
-            <input type="text" id="origin" name="origin" required><br>
-            <label for="destination">Destination:</label>
-            <input type="text" id="destination" name="destination" required><br>
-            <label for="date">Date:</label>
-            <input type="date" id="date" name="date" required><br>
-            <label for="passengers">Number of Passengers:</label>
-            <input type="number" id="passengers" name="passengers" min="1" required><br>
-            <label for="airline">Preferred Airline:</label>
-            <select id="airline" name="airline">
-                <option value="">Any</option>
-                <option value="Delta">Delta</option>
-                <option value="American Airlines">American Airlines</option>
-                <option value="United Airlines">United Airlines</option>
-                <!-- Add more options as needed -->
-            </select><br>
-            <label for="budget">Budget Range:</label>
-            <select id="budget" name="budget">
-                <option value="">Any</option>
-                <option value="0-100">$0 - $100</option>
-                <option value="101-200">$101 - $200</option>
-                <option value="201-300">$201 - $300</option>
-                <!-- Add more options as needed -->
-            </select><br>
-            <button type="submit">Search Flights</button>
-        </form>
-        <div id="flightsContainer"></div>
+        <div id="lobby-view" class="game-view">
+            <h1>Professional Payout Bingo</h1>
+            <div id="joinSection">
+                <input type="text" id="playerNameInput" placeholder="Enter your name" maxlength="20">
+                <button id="joinGameBtn">Join Game</button>
+            </div>
+
+            <div id="waitingMessage" style="display: none;">
+                 Waiting for host approval...
+            </div>
+
+            <div id="waitingPlayerList">
+                <h3>Players Waiting for Approval:</h3>
+                </div>
+
+            <div id="approvedPlayerList">
+                <h3>Approved Players:</h3>
+                 </div>
+
+
+            <div id="financialInfo">
+                <p>Approved Players: <span id="playerCount">0</span></p>
+                <p>Notional Contribution per Person: $50</p>
+                <p>Calculated Total Pot: $<span id="totalPot">0</span></p>
+                <p>Calculated Winner's Payout (after 20%): $<span id="winnerPayout">0</span></p>
+                <p class="disclaimer">Note: This game tracks notional amounts for fun. Actual money exchange happens manually between participants.</p>
+            </div>
+
+            <button id="startGameBtn" disabled>Start Game (Need 4+ Approved)</button>
+        </div>
+
+        <div id="game-view" class="game-view">
+            <h1>Bingo Game In Progress</h1>
+            <div id="currentNumberDisplay">Waiting for host...</div>
+
+            <div style="text-align: center;">
+                 <button id="callNumberBtn" class="host-only">Call Next Number</button>
+                 <button id="bingoBtn" class="player-only">BINGO!</button>
+            </div>
+
+
+            <h2>Called Numbers:</h2>
+            <div id="calledNumbersList">
+                </div>
+
+            <div id="gameFinancialInfo">
+                <p>Players: <span id="gamePlayerCount">0</span></p>
+                <p>Total Pot: $<span id="gameTotalPot">0</span></p>
+                <p>Winner's Payout: $<span id="gameWinnerPayout">0</span></p>
+            </div>
+        </div>
+
+        <div id="bingo-view" class="game-view">
+            <h1>BINGO!</h1>
+            <p><span id="bingoWinnerName"></span> has called BINGO!</p>
+            <p>Please pause and manually verify their card.</p>
+            <div style="text-align: center;">
+                 <button id="newGameBtn" class="host-only">Start New Game</button>
+            </div>
+        </div>
     </div>
 
-    <script>
-        document.getElementById("flightSearchForm").addEventListener("submit", function(event) {
-            event.preventDefault();
-            const origin = document.getElementById("origin").value;
-            const destination = document.getElementById("destination").value;
-            const date = document.getElementById("date").value;
-            const passengers = document.getElementById("passengers").value;
-            const airline = document.getElementById("airline").value;
-            const budget = document.getElementById("budget").value;
 
-            fetchFlights(origin, destination, date, passengers, airline, budget);
+    <script src="https://www.gstatic.com/firebasejs/10.10.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.10.0/firebase-auth-compat.js"></script>
+
+    <script>
+        // ** YOU MUST REPLACE THIS WITH YOUR FIREBASE PROJECT'S CONFIGURATION **
+        // Go to Firebase Console -> Project Settings -> General -> Your apps -> Firebase SDK snippet (Config)
+        const firebaseConfig = {
+          apiKey: "YOUR_API_KEY",
+          authDomain: "YOUR_AUTH_DOMAIN",
+          projectId: "YOUR_PROJECT_ID",
+          storageBucket: "YOUR_STORAGE_BUCKET",
+          messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+          appId: "YOUR_APP_ID"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const auth = firebase.auth();
+
+        let gameRef; // Reference to the current game document in Firestore
+        let userId; // Current user's Firebase Auth UID
+        let playerName; // Store player's name once joined
+        const gameId = 'myFirstBingoGame'; // Fixed game ID for this single-file example
+
+        // --- UI Elements ---
+        const lobbyView = document.getElementById('lobby-view');
+        const gameView = document.getElementById('game-view');
+        const bingoView = document.getElementById('bingo-view');
+
+        const joinSection = document.getElementById('joinSection');
+        const playerNameInput = document.getElementById('playerNameInput');
+        const joinGameBtn = document.getElementById('joinGameBtn');
+        const waitingMessageDiv = document.getElementById('waitingMessage');
+
+        const waitingPlayerListDiv = document.getElementById('waitingPlayerList');
+        const approvedPlayerListDiv = document.getElementById('approvedPlayerList');
+
+        const financialInfo = document.getElementById('financialInfo'); // Reference the container
+        const playerCountSpan = document.getElementById('playerCount');
+        const totalPotSpan = document.getElementById('totalPot');
+        const winnerPayoutSpan = document.getElementById('winnerPayout');
+        const startGameBtn = document.getElementById('startGameBtn');
+
+        const currentNumberDisplay = document.getElementById('currentNumberDisplay');
+        const callNumberBtn = document.getElementById('callNumberBtn');
+        const bingoBtn = document.getElementById('bingoBtn');
+        const calledNumbersListDiv = document.getElementById('calledNumbersList');
+        const gameFinancialInfo = document.getElementById('gameFinancialInfo'); // Reference the container
+        const gamePlayerCountSpan = document.getElementById('gamePlayerCount');
+        const gameTotalPotSpan = document.getElementById('gameTotalPot');
+        const gameWinnerPayoutSpan = document.getElementById('gameWinnerPayout');
+
+        const bingoWinnerNameSpan = document.getElementById('bingoWinnerName');
+        const newGameBtn = document.getElementById('newGameBtn');
+
+        // --- Helper Function to Show/Hide UI Views ---
+        function showView(viewId) {
+            lobbyView.style.display = 'none';
+            gameView.style.display = 'none';
+            bingoView.style.display = 'none';
+            const viewElement = document.getElementById(viewId);
+            if(viewElement) {
+                viewElement.style.display = 'block';
+            } else {
+                console.error("View element not found:", viewId);
+            }
+        }
+
+        // --- Financial Calculation and Display Function ---
+        function updateFinancialDisplay(numApprovedPlayers) {
+            const contribution = 50;
+            const totalPot = numApprovedPlayers * contribution;
+            const winnerPayout = totalPot * 0.80; // 20% deducted means 80% remains
+
+            playerCountSpan.textContent = numApprovedPlayers;
+            totalPotSpan.textContent = totalPot.toFixed(0); // Display as whole number
+            winnerPayoutSpan.textContent = winnerPayout.toFixed(0);
+
+            gamePlayerCountSpan.textContent = numApprovedPlayers;
+            gameTotalPotSpan.textContent = totalPot.toFixed(0);
+            gameWinnerPayoutSpan.textContent = winnerPayout.toFixed(0);
+        }
+
+        // --- Check if the current user is the host ---
+        async function isHost() {
+            if (!gameRef || !userId) return false;
+            try {
+                const gameDoc = await gameRef.get();
+                if (!gameDoc.exists) return false;
+                return gameDoc.data().hostId === userId;
+            } catch (error) {
+                console.error("Error checking host status:", error);
+                return false;
+            }
+        }
+
+
+        // --- Join Game Logic ---
+        joinGameBtn.addEventListener('click', async () => {
+            const inputName = playerNameInput.value.trim();
+            if (!inputName) {
+                alert('Please enter your name.');
+                return;
+            }
+            playerName = inputName; // Store name
+            joinGameBtn.disabled = true; // Prevent double clicks
+            playerNameInput.disabled = true;
+
+            try {
+                // Simple Anonymous Auth - get a unique ID for the user session
+                const userCredential = await auth.signInAnonymously();
+                userId = userCredential.user.uid;
+                 console.log("Authenticated with Firebase. User ID:", userId);
+
+
+                gameRef = db.collection('games').doc(gameId);
+
+                const gameDoc = await gameRef.get();
+                const playerEntry = {
+                    name: playerName,
+                    joinedAt: firebase.firestore.FieldValue.serverTimestamp()
+                };
+
+                if (!gameDoc.exists) {
+                    // Create new game - First player becomes host and is auto-approved
+                    console.log("Game does not exist. Creating new game.");
+                    await gameRef.set({
+                        state: 'lobby',
+                        hostId: userId, // Set creator as host
+                        approvedPlayers: { [userId]: playerEntry },
+                        waitingPlayers: {}, // Start with empty waiting list
+                        calledNumbers: [],
+                        currentNumber: null,
+                        numberPool: Array.from({length: 75}, (_, i) => i + 1), // [1, 2, ..., 75]
+                        bingoCallerId: null
+                    });
+                    console.log("New game created. You are the host.");
+                    // Host is auto-approved, no waiting message needed for them initially
+                } else {
+                    // Join existing game
+                    const gameData = gameDoc.data();
+                    console.log("Game exists. State:", gameData.state);
+                     // Check game state - only join if in lobby
+                    if (gameData.state !== 'lobby') {
+                        alert('Game is already in progress or finished.');
+                        auth.signOut(); // Sign out anonymous user
+                        joinGameBtn.disabled = false;
+                        playerNameInput.disabled = false;
+                        return;
+                    }
+
+                    // Check if already in approved or waiting lists
+                    if ((gameData.approvedPlayers && gameData.approvedPlayers[userId]) || (gameData.waitingPlayers && gameData.waitingPlayers[userId])) {
+                         console.log("You are already in this game based on user ID.");
+                         // Do nothing, listener will handle showing the correct view
+                         // If already in game, might want to re-enable input/button temporarily
+                         joinGameBtn.disabled = false;
+                         playerNameInput.disabled = false; // Or keep disabled if user is shown as joined
+                    } else {
+                         // Add player to the waiting list
+                        console.log("Adding player to waiting list.");
+                        await gameRef.update({
+                            [`waitingPlayers.${userId}`]: {
+                                name: playerName,
+                                requestedAt: firebase.firestore.FieldValue.serverTimestamp()
+                            }
+                        });
+                        console.log("Player added to waiting list.");
+                        // Show waiting message immediately
+                        joinSection.style.display = 'none';
+                        waitingMessageDiv.style.display = 'block';
+                    }
+                }
+
+                // Start listening for game state changes regardless of creation or joining attempt
+                listenForGameUpdates();
+
+            } catch (error) {
+                console.error("Error joining game:", error);
+                alert("Failed to join game. Please try again.");
+                 // If sign-in failed or database write failed, reset UI
+                if (userId) { auth.signOut(); userId = null; } // Sign out if auth succeeded but write failed
+                joinGameBtn.disabled = false;
+                playerNameInput.disabled = false;
+                joinSection.style.display = 'block'; // Show join section again
+                waitingMessageDiv.style.display = 'none'; // Hide waiting message
+            }
         });
 
-        function fetchFlights(origin, destination, date, passengers, airline, budget) {
-            // Here you would make an API call to fetch flights from the server
-            // For this example, we'll just simulate data
-            const flights = [
-                { airline: "Delta", origin: "New York", destination: "Los Angeles", date: "2024-03-15", time: "10:00", price: 250 },
-                { airline: "American Airlines", origin: "New York", destination: "Los Angeles", date: "2024-03-15", time: "12:00", price: 280 },
-                { airline: "United Airlines", origin: "Los Angeles", destination: "New York", date: "2024-03-15", time: "11:
+        // --- Listen for Game State Changes from Firebase ---
+        function listenForGameUpdates() {
+            if (!gameRef) {
+                console.error("Game reference not set.");
+                return;
+            }
+
+            gameRef.onSnapshot(async (docSnapshot) => {
+                if (!docSnapshot.exists) {
+                    console.error("Game document deleted.");
+                    alert("The game was deleted by the host.");
+                    window.location.reload(); // Simple reset
+                    return;
+                }
+
+                const gameData = docSnapshot.data();
+                const approvedPlayers = gameData.approvedPlayers || {};
+                const waitingPlayers = gameData.waitingPlayers || {};
+                const numApprovedPlayers = Object.keys(approvedPlayers).length;
+                const isCurrentUserHost = await isHost();
+
+                // Determine current user's status
+                const isCurrentUserApproved = approvedPlayers[userId] !== undefined;
+                const isCurrentUserWaiting = waitingPlayers[userId] !== undefined;
+                const isCurrentUserKnown = isCurrentUserApproved || isCurrentUserWaiting; // Are they in either list?
+
+
+                // --- Update Lobby View based on Approval Status and Role ---
+                if (gameData.state === 'lobby') {
+                     showView('lobby-view');
+
+                     // Show/hide join section and waiting message based on user's status
+                     joinSection.style.display = isCurrentUserKnown ? 'none' : 'block';
+                     waitingMessageDiv.style.display = isCurrentUserWaiting ? 'block' : 'none';
+                     // If the user *is* approved, they don't see the waiting message or join section
+                     if (isCurrentUserApproved) {
+                         joinSection.style.display = 'none';
+                         waitingMessageDiv.style.display = 'none';
+                     }
+
+
+                     // Update financial info based *only* on approved players
+                     updateFinancialDisplay(numApprovedPlayers);
+
+                     // Render Approved Players list
+                     approvedPlayerListDiv.innerHTML = '<h3>Approved Players:</h3>' +
+                         (Object.keys(approvedPlayers).length === 0 ? '<p>No players approved yet.</p>' :
+                          Object.values(approvedPlayers).map(p => `<div><span>${p.name}</span></div>`).join(''));
+
+                     // Render Waiting Players list
+                     let waitingHtml = '<h3>Players Waiting for Approval:</h3>';
+                     if (Object.keys(waitingPlayers).length === 0) {
+                         waitingHtml += '<p>No players waiting.</p>';
+                     } else {
+                          Object.entries(waitingPlayers).forEach(([waitingId, waitingPlayer]) => {
+                              waitingHtml += `
+                                 <div data-user-id="${waitingId}">
+                                     <span>${waitingPlayer.name}</span>
+                                     ${isCurrentUserHost ?
+                                        `<div>
+                                            <button class="approve-btn">Approve</button>
+                                            <button class="reject-btn">Reject</button>
+                                        </div>`
+                                        : ''}
+                                 </div>
+                             `;
+                          });
+                     }
+                     waitingPlayerListDiv.innerHTML = waitingHtml;
+
+
+                     // Show/hide start game button based on host role and approved player count
+                     startGameBtn.style.display = isCurrentUserHost ? 'block' : 'none';
+                     startGameBtn.disabled = numApprovedPlayers < 4; // Disable if not enough approved players
+
+
+                } else { // If not in lobby state (game is running or bingo called)
+                    // Ensure only approved players see the game or bingo view
+                    if(isCurrentUserApproved) {
+                         // Hide lobby-specific elements
+                         joinSection.style.display = 'none';
+                         waitingMessageDiv.style.display = 'none';
+                         financialInfo.style.display = 'none'; // Hide lobby financial info
+                         startGameBtn.style.display = 'none'; // Hide start button
+
+                         if (gameData.state === 'calling') {
+                              showView('game-view');
+                              currentNumberDisplay.textContent = gameData.currentNumber ? `Calling: ${gameData.currentNumber}` : 'Game Started! Waiting for first number...';
+                              calledNumbersListDiv.innerHTML = `<strong>Called:</strong> ${gameData.calledNumbers.join(', ')}`;
+                              // Show/hide buttons based on role
+                              callNumberBtn.style.display = isCurrentUserHost ? 'inline-block' : 'none';
+                              bingoBtn.style.display = isCurrentUserHost ? 'none' : 'inline-block'; // Players see BINGO button
+                              gameFinancialInfo.style.display = 'block'; // Show game financial info
+
+                         } else if (gameData.state === 'bingo_called') {
+                             showView('bingo-view');
+                             const callerPlayer = approvedPlayers[gameData.bingoCallerId]; // Get winner from approved list
+                             bingoWinnerNameSpan.textContent = callerPlayer ? callerPlayer.name : 'Someone (ID: ' + gameData.bingoCallerId + ')';
+                             // Host sees the option to start a new game
+                             newGameBtn.style.display = isCurrentUserHost ? 'inline-block' : 'none';
+                              gameFinancialInfo.style.display = 'block'; // Show game financial info
+
+                         } else {
+                             // Handle other potential game states or finished state if needed
+                             console.warn("Unhandled game state for approved player:", gameData.state);
+                             // Maybe show a generic game in progress view or redirect
+                         }
+
+
+                    } else if (isCurrentUserWaiting) {
+                        // Player is waiting but game started - keep them in lobby view with a message
+                         showView('lobby-view');
+                         joinSection.style.display = 'none';
+                         waitingMessageDiv.style.display = 'block';
+                         // Update lists/info to reflect game is in progress
+                         waitingPlayerListDiv.innerHTML = '<h3>Players Waiting for Approval:</h3><p>Game is in progress. Your request may be considered for the next game.</p>';
+                         approvedPlayerListDiv.innerHTML = '<h3>Approved Players:</h3><p>Game in progress...</p>';
+                         financialInfo.style.display = 'none'; // Hide financial info during game if waiting
+                         startGameBtn.style.display = 'none';
+
+                    } else {
+                         // Not approved, not waiting, and game started (e.g., arrived late or refreshed)
+                         // Show lobby view but indicate game is in progress
+                         showView('lobby-view');
+                         joinSection.style.display = 'block'; // Allow them to try joining again (for next game)
+                         waitingMessageDiv.style.display = 'none';
+                         approvedPlayerListDiv.innerHTML = '<h3>Approved Players:</h3><p>Game currently in progress.</p>';
+                         waitingPlayerListDiv.innerHTML = ''; // Clear waiting list view for late arrivals
+                         financialInfo.style.display = 'none';
+                         startGameBtn.style.display = 'none';
+                         console.log("User is not in game lists, and game state is not lobby.");
+                    }
+                }
+
+
+            }, (error) => {
+                console.error("Error listening to game updates:", error);
+                alert("Connection error. Please try reloading.");
+                 // Attempt to sign out anonymous user on error
+                auth.signOut();
+                userId = null;
+                // Reset UI state
+                showView('lobby-view');
+                joinSection.style.display = 'block';
+                waitingMessageDiv.style.display = 'none';
+                joinGameBtn.disabled = false;
+                playerNameInput.disabled = false;
+                 approvedPlayerListDiv.innerHTML = '<h3>Approved Players:</h3><p>Connection error.</p>';
+                 waitingPlayerListDiv.innerHTML = '<h3>Players Waiting for Approval:</h3><p>Connection error.</p>';
+                 financialInfo.style.display = 'block'; // Show back financial section
+                 startGameBtn.style.display = 'none'; // Ensure start button hidden on error
+            });
+        }
+
+        // --- Event Delegation for Approve/Reject Buttons (since they are added dynamically) ---
+        waitingPlayerListDiv.addEventListener('click', async (event) => {
+            if (!await isHost()) return; // Only host actions
+            console.log("Host interaction in waiting list.");
+
+            const target = event.target;
+            // Find the closest parent div with the data-user-id attribute
+            const playerDiv = target.closest('div[data-user-id]');
+            if (!playerDiv) return;
+
+            const userIdToManage = playerDiv.dataset.userId;
+             console.log("Action on user ID:", userIdToManage);
+
+
+            if (target.classList.contains('approve-btn')) {
+                console.log("Attempting to approve:", userIdToManage);
+                // Disable buttons temporarily to prevent double clicks
+                 playerDiv.querySelectorAll('button').forEach(btn => btn.disabled = true);
+
+                try {
+                    const gameDoc = await gameRef.get();
+                    const gameData = gameDoc.data();
+                    const playerToApprove = gameData.waitingPlayers[userIdToManage];
+
+                    if (playerToApprove) {
+                        // Use a batched write for atomicity: Add to approved, remove from waiting
+                        const batch = db.batch();
+
+                        const approvedPlayerEntry = {
+                             name: playerToApprove.name, // Use name from waiting list
+                             joinedAt: firebase.firestore.FieldValue.serverTimestamp() // Set join time now
+                        };
+
+                        batch.set(gameRef.collection('approvedPlayers').doc(userIdToManage), approvedPlayerEntry); // Use subcollection if preferred, or map update
+                         // Sticking with map update for simplicity as in previous schema
+                         batch.set(gameRef, { approvedPlayers: { [userIdToManage]: approvedPlayerEntry } }, { merge: true });
+
+                        batch.update(gameRef, { [`waitingPlayers.${userIdToManage}`]: firebase.firestore.FieldValue.delete() }); // Remove from waiting
+
+                        await batch.commit();
+                        console.log("Player approved:", userIdToManage);
+                        // UI updates handled by the snapshot listener
+                    } else {
+                        console.warn("Player not found in waiting list:", userIdToManage);
+                         alert("Player not found in waiting list.");
+                    }
+                } catch (error) {
+                    console.error("Error approving player:", error);
+                    alert("Failed to approve player.");
+                    // Re-enable buttons on failure
+                    playerDiv.querySelectorAll('button').forEach(btn => btn.disabled = false);
+                }
+
+            } else if (target.classList.contains('reject-btn')) {
+                 console.log("Attempting to reject:", userIdToManage);
+                 // Disable buttons temporarily
+                 playerDiv.querySelectorAll('button').forEach(btn => btn.disabled = true);
+
+                 try {
+                    // Just remove from waiting list
+                    await gameRef.update({
+                        [`waitingPlayers.${userIdToManage}`]: firebase.firestore.FieldValue.delete()
+                    });
+                    console.log("Player rejected:", userIdToManage);
+                    // UI updates handled by the snapshot listener
+                    // Optional: In a real app, you might also sign out the anonymous user associated with this ID if they were rejected.
+                 } catch (error) {
+                    console.error("Error rejecting player:", error);
+                    alert("Failed to reject player.");
+                     // Re-enable buttons on failure
+                    playerDiv.querySelectorAll('button').forEach(btn => btn.disabled = false);
+                 }
+            }
+        });
+
+
+        // --- Start Game Logic (Host Only) ---
+        startGameBtn.addEventListener('click', async () => {
+            if (!gameRef || !(await isHost())) return; // Ensure only host can start
+            startGameBtn.disabled = true; // Prevent double clicks
+             console.log("Host attempting to start game.");
+
+            try {
+                const gameDoc = await gameRef.get();
+                const approvedPlayers = gameDoc.data().approvedPlayers || {};
+                const numApprovedPlayers = Object.keys(approvedPlayers).length;
+                 if (numApprovedPlayers < 4) {
+                     alert("You need at least 4 approved players to start the game.");
+                     startGameBtn.disabled = false; // Re-enable if check fails
+                     return;
+                 }
+
+                await gameRef.update({
+                    state: 'calling',
+                    // Initialize number pool (and shuffle) - ensure this is done reliably
+                    numberPool: Array.from({length: 75}, (_, i) => i + 1).sort(() => Math.random() - 0.5),
+                    calledNumbers: [],
+                    currentNumber: null,
+                    bingoCallerId: null, // Reset for the new game
+                    waitingPlayers: {} // Clear any remaining waiting players when game starts
+                });
+                 console.log("Game state set to 'calling'.");
+                 // Button re-enabled by snapshot listener update
+
+            } catch (error) {
+                 console.error("Error starting game:", error);
+                 alert("Failed to start game.");
+                 startGameBtn.disabled = false; // Re-enable button on failure
+            }
+        });
+
+        // --- Call Number Logic (Host Only) ---
+        callNumberBtn.addEventListener('click', async () => {
+            if (!gameRef || !(await isHost())) return; // Ensure only host can call
+            callNumberBtn.disabled = true; // Prevent double clicks
+             console.log("Host attempting to call number.");
+
+            try {
+                const gameDoc = await gameRef.get();
+                const gameData = gameDoc.data();
+                let pool = gameData.numberPool || [];
+                let called = gameData.calledNumbers || [];
+
+                if (pool.length === 0) {
+                    alert('All numbers have been called!');
+                    callNumberBtn.disabled = false;
+                    return;
+                }
+
+                // Select the next number from the pre-shuffled pool (using shift modifies array)
+                const calledNumber = pool.shift();
+                called.push(calledNumber);
+
+                await gameRef.update({
+                    currentNumber: calledNumber,
+                    calledNumbers: called,
+                    numberPool: pool // Update the remaining pool in Firebase
+                });
+                 console.log("Called number:", calledNumber);
+                 // Button re-enabled by snapshot listener update
+
+            } catch (error) {
+                 console.error("Error calling number:", error);
+                 alert("Failed to call number.");
+                 callNumberBtn.disabled = false; // Re-enable button on failure
+            }
+        });
+
+        // --- BINGO! Logic (Player Only) ---
+        bingoBtn.addEventListener('click', async () => {
+             if (!gameRef || await isHost()) return; // Ensure only non-hosts can call BINGO
+             bingoBtn.disabled = true; // Prevent double clicks
+             console.log("Player attempting to call BINGO.");
+
+             try {
+                 // Simple implementation: just update state and caller ID
+                 // Verification is manual visually by other players/host
+                 await gameRef.update({
+                     state: 'bingo_called',
+                     bingoCallerId: userId // Store who called bingo
+                     // Optional: store a snapshot of calledNumbers at this moment for verification
+                 });
+                 console.log("BINGO called by:", userId);
+                 // Button stays disabled until new game starts or page reloads
+             } catch (error) {
+                 console.error("Error calling BINGO:", error);
+                 alert("Failed to call BINGO.");
+                 bingoBtn.disabled = false; // Re-enable button on failure
+             }
+        });
+
+        // --- Start New Game Logic (Host Only in BINGO view) ---
+        newGameBtn.addEventListener('click', async () => {
+             if (!gameRef || !(await isHost())) return; // Ensure only host can start new game
+             newGameBtn.disabled = true; // Prevent double clicks
+             console.log("Host attempting to start new game.");
+
+             try {
+                 // Reset game state but keep approved players and host ID
+                 await gameRef.update({
+                     state: 'lobby', // Go back to lobby state
+                     calledNumbers: [], // Reset game data
+                     currentNumber: null,
+                     numberPool: Array.from({length: 75}, (_, i) => i + 1).sort(() => Math.random() - 0.5), // Reset & shuffle pool
+                     bingoCallerId: null,
+                     waitingPlayers: {} // Clear the waiting list for the new game
+                 });
+                 console.log("New game started in lobby state.");
+                 // Button re-enabled by snapshot listener update
+             } catch (error) {
+                 console.error("Error starting new game:", error);
+                 alert("Failed to start new game.");
+                 newGameBtn.disabled = false; // Re-enable button on failure
+             }
+        });
+
+        // --- Initial Setup ---
+        // Check auth state on load. If already authenticated anonymously, try to join.
+        auth.onAuthStateChanged(async (user) => {
+            if (user) {
+                userId = user.uid;
+                 console.log("onAuthStateChanged: Authenticated with Firebase. User ID:", userId);
+                 // Check if this user is already in the fixed game, then start listening.
+                 // This prevents users who reload from having to click "Join" again if they were already in.
+                 gameRef = db.collection('games').doc(gameId);
+                 const gameDoc = await gameRef.get();
+                 if (gameDoc.exists) {
+                      const gameData = gameDoc.data();
+                       if ((gameData.approvedPlayers && gameData.approvedPlayers[userId]) || (gameData.waitingPlayers && gameData.waitingPlayers[userId])) {
+                            console.log("User found in existing game lists. Starting listener.");
+                            // Restore player name if possible (not stored persistently in this version)
+                             // For simplicity, they might still need to enter name if they weren't approved/waiting
+                            listenForGameUpdates();
+                            // Hide join section if user is known
+                             joinSection.style.display = 'none';
+                             waitingMessageDiv.style.display = (gameData.waitingPlayers && gameData.waitingPlayers[userId]) ? 'block' : 'none';
+                            return; // Exit if user is found and listener started
+                       }
+                 }
+
+                 // If user is authenticated but not in *this* game, or game doesn't exist
+                 console.log("User authenticated but not found in game. Showing join screen.");
+                 showView('lobby-view'); // Ensure lobby is visible
+                 joinSection.style.display = 'block'; // Show join input
+                 waitingMessageDiv.style.display = 'none'; // Hide waiting
+                 joinGameBtn.disabled = false;
+                 playerNameInput.disabled = false;
+
+            } else {
+                userId = null;
+                console.log("onAuthStateChanged: Not authenticated. Showing join screen.");
+                 // User is not authenticated (or signed out). Show join screen.
+                showView('lobby-view');
+                joinSection.style.display = 'block';
+                waitingMessageDiv.style.display = 'none';
+                 joinGameBtn.disabled = false;
+                 playerNameInput.disabled = false;
+            }
+        });
+
+        // Initial display setup (might be overridden by onAuthStateChanged)
+        showView('lobby-view');
+
+
+    </script>
+</body>
+</html>
+
