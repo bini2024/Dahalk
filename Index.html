@@ -1,829 +1,850 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Professional Payout Bingo</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>HABESHA bingo community</title>
+    <meta name="description" content="Lightweight online bingo you can host with friends. Cards generate in-browser. Caller & player views. No login.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        body {
-            font-family: sans-serif;
-            margin: 20px;
-            background-color: #f4f4f4;
-            color: #333;
-            line-height: 1.6;
+        :root{
+            --bg:#ebc5c5;
+            --panel:#0094f0;
+            --muted:#a7b0c4;
+            --text:#000000;
+            --brand:#0c0073;
+            --brand-2:#004170;
+            --accent:#22c55e;
+            --danger:#ef4444;
+            --warning:#f59e0b;
+            --ring: rgba(124,156,255,.45);
+            --card:#0e1430;
+            --grid:#1b244b;
+            --shadow: 0 10px 30px rgba(0,0,0,.4), 0 2px 6px rgba(0,0,0,.3);
         }
-
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            background-color: #fff;
-            padding: 20px 30px;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        *{box-sizing:border-box}
+        html,body{height:100%}
+        body{
+            margin:0; font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Ubuntu; color:var(--text);
+            background: radial-gradient(1200px 500px at 70% -10%, #12204a 0%, transparent 60%),
+                        radial-gradient(900px 450px at -10% 10%, #0e2c3c 0%, transparent 60%),
+                        var(--bg);
         }
-
-        h1, h2, h3 {
-            color: #0056b3;
-            text-align: center;
-            margin-bottom: 20px;
+        a{color:var(--brand)}
+        .container{max-width:1100px;margin:0 auto;padding:24px}
+        .app{
+            display:grid; gap:20px; grid-template-columns: 1.2fr .8fr;
         }
-         h3 {
-            color: #555;
-            margin-top: 25px;
-            margin-bottom: 10px;
-            border-bottom: 1px solid #eee;
-            padding-bottom: 5px;
-         }
-
-
-        .game-view {
-            display: none; /* Managed by JavaScript */
+        @media (max-width: 980px){ .app{grid-template-columns:1fr} }
+        .card{background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,.00));border:1px solid rgba(255,255,255,.06); border-radius:18px; box-shadow:var(--shadow)}
+        .panel{padding:22px}
+        .header{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:8px}
+        h1{font-size:28px;margin:0;letter-spacing:.4px}
+        .tag{font-size:12px;color:var(--muted);background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);padding:6px 10px;border-radius:999px}
+        .row{display:flex;gap:12px;flex-wrap:wrap}
+        .input, select{
+            width:100%; padding:12px 14px; border-radius:12px; border:1px solid rgba(255,255,255,.12);
+            background:rgba(6,10,30,.7); color:var(--text); outline:none; transition:border .2s, box-shadow .2s;
         }
-
-        #lobby-view, #game-view, #bingo-view {
-             /* Styles specific to each view if needed */
+        .input:focus, select:focus{ border-color: var(--brand); box-shadow: 0 0 0 4px var(--ring)}
+        label{font-size:13px;color:var(--muted)}
+        .btn{
+            display:inline-flex;align-items:center;justify-content:center;gap:8px;
+            padding:12px 16px;border-radius:12px;border:1px solid rgba(255,255,255,.1);
+            background:linear-gradient(180deg, rgba(124,156,255,.25), rgba(124,156,255,.1));
+            color:var(--text); cursor:pointer; user-select:none; font-weight:600; letter-spacing:.25px;
+            box-shadow:var(--shadow);
         }
-
-        #financialInfo, #gameFinancialInfo {
-            background-color: #e9ecef;
-            padding: 15px;
-            border-radius: 5px;
-            margin-bottom: 20px;
-            border-left: 5px solid #007bff;
+        .btn:hover{filter:brightness(1.05)}
+        .btn.secondary{background:rgba(255,255,255,.05)}
+        .btn.success{background:linear-gradient(180deg, rgba(34,197,94,.35), rgba(34,197,94,.12))}
+        .btn.warn{background:linear-gradient(180deg, rgba(245,158,11,.35), rgba(245,158,11,.12))}
+        .btn.danger{background:linear-gradient(180deg, rgba(239,68,68,.35), rgba(239,68,68,.12))}
+        .btn:disabled{
+            opacity:0.5;
+            cursor:not-allowed;
+            filter:none;
         }
-        #financialInfo p, #gameFinancialInfo p {
-            margin: 5px 0;
-        }
-
-        #currentNumberDisplay {
-            font-size: 4em;
-            font-weight: bold;
-            text-align: center;
-            margin: 30px 0;
-            color: #28a745;
-            padding: 15px;
-            border: 2px dashed #28a745;
-            border-radius: 8px;
-            background-color: #e2f0cb;
-        }
-
-        #calledNumbersList {
-            margin-top: 20px;
-            padding: 15px;
-            border: 1px solid #ccc;
-            max-height: 150px;
-            overflow-y: auto;
-            background-color: #f8f9fa;
-            border-radius: 5px;
-        }
-        #calledNumbersList strong {
-            display: block;
-            margin-bottom: 5px;
-            color: #555;
-        }
-
-        button {
-            display: inline-block;
-            padding: 10px 20px;
-            margin: 10px 5px;
-            cursor: pointer;
-            border: none;
-            border-radius: 5px;
-            font-size: 1em;
-            transition: background-color 0.3s ease;
-        }
-
-        #joinGameBtn { background-color: #28a745; color: white; }
-        #joinGameBtn:hover { background-color: #218838; }
-
-        #startGameBtn { background-color: #007bff; color: white; }
-        #startGameBtn:hover:not(:disabled) { background-color: #0056b3; }
-
-        #callNumberBtn { background-color: #ffc107; color: #333; }
-        #callNumberBtn:hover:not(:disabled) { background-color: #e0a800; }
-
-        #bingoBtn { background-color: #dc3545; color: white; }
-        #bingoBtn:hover:not(:disabled) { background-color: #c82333; }
-
-        #newGameBtn { background-color: #17a2b8; color: white; }
-        #newGameBtn:hover:not(:disabled) { background-color: #138496; }
-
-        .approve-btn { background-color: #28a745; color: white; padding: 5px 10px; font-size: 0.8em; margin-left: 10px;}
-        .reject-btn { background-color: #dc3545; color: white; padding: 5px 10px; font-size: 0.8em; margin-left: 5px;}
-        .approve-btn:hover { background-color: #218838; }
-        .reject-btn:hover { background-color: #c82333; }
-
-
-        button:disabled {
-            background-color: #ccc;
-            cursor: not-allowed;
-            opacity: 0.6;
-        }
-
-        input[type="text"] {
-            padding: 10px;
-            margin-right: 10px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            font-size: 1em;
-        }
-
-        #waitingPlayerList div, #approvedPlayerList div {
-            margin: 8px 0;
-            padding: 8px;
-            background-color: #f8f9fa;
-            border-radius: 3px;
-            display: flex; /* Use flexbox for layout */
-            justify-content: space-between; /* Push name and buttons apart */
-            align-items: center;
-             word-break: break-word; /* Prevent long names breaking layout */
-        }
-         #waitingPlayerList div span, #approvedPlayerList div span {
-             flex-grow: 1; /* Allow name to take up space */
-             margin-right: 10px; /* Spacing between name and buttons */
-         }
-
-
-        .disclaimer {
-            font-size: 0.9em;
-            color: #6c757d;
-            margin-top: 20px;
-            padding: 10px;
-            border: 1px dashed #6c757d;
-            border-radius: 5px;
-            text-align: center;
-        }
-
-        #bingoWinnerName {
-            font-weight: bold;
-            color: #28a745;
-        }
-
-        #waitingMessage {
-            text-align: center;
-            font-size: 1.2em;
-            color: #ff9800;
-            margin-top: 20px;
-            padding: 15px;
-            border: 1px dashed #ff9800;
-            border-radius: 5px;
-            background-color: #fff3e0;
-        }
-
+        .grid{display:grid; grid-template-columns: repeat(5, 1fr); gap:8px}
+        .bingo-card{padding:18px;background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02)); border:1px solid rgba(255,255,255,.1); border-radius:20px}
+        .bingo-head div{font-size:18px;font-weight:800;text-align:center;background:rgba(255,255,255,.08); padding:10px;border-radius:12px;letter-spacing:2px}
+        .cell{position:relative; text-align:center; padding:16px 6px; border-radius:14px; background:var(--card); border:1px solid rgba(255,255,255,.08); font-size:18px; font-weight:700; cursor:pointer; transition:transform .1s ease, background .2s ease, border-color .2s ease}
+        .cell:hover{transform:translateY(-1px)}
+        .cell.called{background:linear-gradient(180deg, rgba(124,156,255,.25), rgba(124,156,255,.05)); border-color:rgba(124,156,255,.45)}
+        .cell.marked{background:linear-gradient(180deg, rgba(34,197,94,.35), rgba(34,197,94,.08)); border-color: rgba(34,197,94,.55); box-shadow: inset 0 0 0 3px rgba(34,197,94,.35)}
+        .cell.free{background:linear-gradient(180deg, rgba(158,240,255,.35), rgba(158,240,255,.08)); border-color: rgba(158,240,255,.55)}
+        .kicker{font-size:12px;color:var(--muted)}
+        .muted{color:var(--muted)}
+        .callout{padding:14px;border-radius:14px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08)}
+        .footer{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:16px}
+        .badge{display:inline-flex;align-items:center;gap:6px;padding:8px 10px;border-radius:999px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.04);font-size:12px}
+        .split{display:grid; grid-template-columns: 1fr 1fr; gap:20px}
+        @media (max-width: 740px){ .split{grid-template-columns:1fr} }
+        .board{display:grid;grid-template-columns: repeat(15, 1fr); gap:8px}
+        .num{padding:10px 0;text-align:center;border-radius:10px;border:1px solid rgba(255,255,255,.08);background:var(--grid);font-weight:700}
+        .num.hit{background:linear-gradient(180deg, rgba(124,156,255,.28), rgba(124,156,255,.08));border-color:rgba(124,156,255,.5)}
+        .last-call{font-size:72px; font-weight:900; text-align:center; letter-spacing:2px; margin:0}
+        @media (max-width: 740px){ .last-call{font-size:48px} }
+        .switch{display:inline-flex; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12); border-radius:12px; overflow:hidden}
+        .switch button{border:0;background:transparent;color:var(--text);padding:10px 14px;cursor:pointer;font-weight:700}
+        .switch button.active{background:rgba(124,156,255,.25)}
+        .hidden{display:none}
+        .mono{font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace}
     </style>
 </head>
 <body>
     <div class="container">
-        <div id="lobby-view" class="game-view">
-            <h1>Professional Payout Bingo</h1>
-            <div id="joinSection">
-                <input type="text" id="playerNameInput" placeholder="Enter your name" maxlength="20">
-                <button id="joinGameBtn">Join Game</button>
+        <div class="header">
+            <h1>🎉 HABESHA Bingo</h1>
+            <div class="row">
+                <span class="tag">No login • Host & Play • Works on phone</span>
             </div>
+        </div>
 
-            <div id="waitingMessage" style="display: none;">
-                 Waiting for host approval...
-            </div>
-
-            <div id="waitingPlayerList">
-                <h3>Players Waiting for Approval:</h3>
+        <div class="app">
+            <div class="card panel" id="left">
+                <div class="row" style="justify-content:space-between; align-items:center; margin-bottom:12px">
+                    <div class="switch" role="tablist" aria-label="Mode switch">
+                        <button id="tabPlayer" class="active" onclick="switchTab('player')">Player</button>
+                        <button id="tabHost" onclick="switchTab('host')">Host/Caller</button>
+                    </div>
+                    <div class="row">
+                        <button class="btn secondary" onclick="openModal('rulesModal')">Rules</button>
+                        <button class="btn secondary" onclick="openModal('payoutModal')">E‑Transfer Info</button>
+                    </div>
                 </div>
 
-            <div id="approvedPlayerList">
-                <h3>Approved Players:</h3>
-                 </div>
+                <section id="playerView">
+                    <div class="split">
+                        <div>
+                            <div class="row">
+                                <div style="flex:1">
+                                    <label for="playerName">Your name</label>
+                                    <input id="playerName" class="input" placeholder="e.g., Biniam" />
+                                </div>
+                                <div style="flex:1">
+                                    <label for="gameId">Game ID (host shares)</label>
+                                    <input id="gameId" class="input mono" placeholder="e.g., 482913" />
+                                </div>
+                            </div>
+                            <div class="row" style="margin-top:10px">
+                                <button id="generateBtn" class="btn" onclick="generateCard()">Generate Card</button>
+                                <button class="btn secondary" onclick="resetCard()">Reset</button>
+                                <button class="btn success" onclick="claimBingo()">Claim Bingo</button>
+                            </div>
+                            <p class="kicker">Tip: Enter the Game ID from your host so everyone plays the same round. Cards are unique to your name.</p>
+                            <div id="cardDetails" class="muted" style="margin-top: 10px; font-size: 14px;"></div>
+                            <div id="cardArea" class="bingo-card" aria-live="polite" style="margin-top:14px">
+                                <div class="grid bingo-head" aria-hidden="true">
+                                    <div>B</div><div>I</div><div>N</div><div>G</div><div>O</div>
+                                </div>
+                                <div id="cardGrid" class="grid" style="margin-top:8px"></div>
+                            </div>
+                            <div class="footer">
+                                <span id="status" class="badge">No bingo yet</span>
+                                <div class="row">
+                                    <button class="btn warn" onclick="togglePaste()">Paste Called #</button>
+                                    <button class="btn secondary" onclick="downloadCardPNG()">Download PNG</button>
+                                </div>
+                            </div>
 
+                            <div id="pasteWrap" class="hidden" style="margin-top:10px">
+                                <label for="pasteInput">Paste called numbers (comma or space separated)</label>
+                                <textarea id="pasteInput" class="input" rows="2" placeholder="e.g., B5, 17, N31, 73 ..."></textarea>
+                                <div class="row" style="margin-top:8px">
+                                    <button class="btn" onclick="applyCalledFromPaste()">Apply</button>
+                                    <button class="btn secondary" onclick="clearCalled()">Clear</button>
+                                </div>
+                            </div>
 
-            <div id="financialInfo">
-                <p>Approved Players: <span id="playerCount">0</span></p>
-                <p>Notional Contribution per Person: $50</p>
-                <p>Calculated Total Pot: $<span id="totalPot">0</span></p>
-                <p>Calculated Winner's Payout (after 20%): $<span id="winnerPayout">0</span></p>
-                <p class="disclaimer">Note: This game tracks notional amounts for fun. Actual money exchange happens manually between participants.</p>
+                        </div>
+
+                        <aside>
+                            <div class="callout">
+                                <strong>How to play</strong>
+                                <ol style="margin:10px 0 0 18px; color:var(--muted)">
+                                    <li>Ask the host for the <b>Game ID</b> & entry fee.</li>
+                                    <li>Send entry via <b>e‑Transfer</b> (see E‑Transfer Info).</li>
+                                    <li>Generate your card & join the live stream.</li>
+                                    <li>Tap numbers as they are called. We auto-detect lines.</li>
+                                    <li>Hit <b>Claim Bingo</b> and send screenshot to host.</li>
+                                </ol>
+                            </div>
+                            <div class="callout" style="margin-top:12px">
+                                <strong>Winning patterns</strong>
+                                <ul style="margin:10px 0 0 18px; color:var(--muted)">
+                                    <li>Single Line (row/column/diagonal)</li>
+                                    <li>Double Line</li>
+                                    <li>Full House (all cells)</li>
+                                </ul>
+                            </div>
+                        </aside>
+                    </div>
+                </section>
+
+                <section id="hostView" class="hidden">
+                    <div class="row">
+                        <div style="flex:1">
+                            <label for="hostGameId">Game ID</label>
+                            <input id="hostGameId" class="input mono" placeholder="e.g., 482913" />
+                        </div>
+                        <div>
+                            <label>&nbsp;</label>
+                            <div class="row">
+                                <button class="btn" onclick="startCaller()">Start / Reset</button>
+                                <button class="btn secondary" onclick="copyShare()">Copy Share Text</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card panel" style="margin-top:16px">
+                        <h3 style="margin:0 0 8px 0">Caller</h3>
+                        <p id="hostHint" class="muted" style="margin:0 0 10px 0">Enter a Game ID and press <b>Start</b>. Share the ID with players. Stream this screen when hosting.</p>
+                        <div class="row" style="align-items:center;justify-content:space-between;margin:10px 0">
+                            <h2 id="lastCall" class="last-call">—</h2>
+                            <div class="row">
+                                <button id="btnNext" class="btn success" onclick="drawNext()" disabled>Draw Next</button>
+                                <button class="btn danger" onclick="undoCall()" disabled id="btnUndo">Undo</button>
+                                <button class="btn secondary" onclick="exportHistory()" disabled id="btnExport">Export</button>
+                            </div>
+                        </div>
+                        <div class="board" id="board"></div>
+                        <div style="margin-top:12px">
+                            <label>History</label>
+                            <div id="history" class="input mono" style="min-height:52px"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="card panel" style="margin-top:16px">
+                        <h3 style="margin:0 0 8px 0">Card Verifier</h3>
+                        <p class="muted" style="margin:0 0 10px 0">Enter a player's name and card ID to verify their claim.</p>
+                        <div class="row">
+                            <div style="flex:1">
+                                <label for="verifyName">Player Name</label>
+                                <input id="verifyName" class="input" placeholder="e.g., Biniam" />
+                            </div>
+                            <div style="flex:1">
+                                <label for="verifyCardID">Card ID</label>
+                                <input id="verifyCardID" class="input mono" placeholder="e.g., 32D56" />
+                            </div>
+                        </div>
+                        <div class="row" style="margin-top:10px">
+                            <button class="btn" onclick="verifyCardID()">Verify</button>
+                        </div>
+                        <div id="verificationStatus" class="callout" style="margin-top:12px; display:none;"></div>
+                    </div>
+                    </section>
             </div>
 
-            <button id="startGameBtn" disabled>Start Game (Need 4+ Approved)</button>
-        </div>
-
-        <div id="game-view" class="game-view">
-            <h1>Bingo Game In Progress</h1>
-            <div id="currentNumberDisplay">Waiting for host...</div>
-
-            <div style="text-align: center;">
-                 <button id="callNumberBtn" class="host-only">Call Next Number</button>
-                 <button id="bingoBtn" class="player-only">BINGO!</button>
-            </div>
-
-
-            <h2>Called Numbers:</h2>
-            <div id="calledNumbersList">
+            <aside class="card panel" id="right">
+                <h3 style="margin:0 0 8px 0">E‑Transfer Details</h3>
+                <p class="muted" style="margin:0 0 12px 0">Customize this box. Players pay before generating a card.</p>
+                <div class="row">
+                    <div style="flex:1">
+                        <label for="payeeName">Payee Name</label>
+                        <input id="payeeName" class="input" placeholder="Your Name" value="Eri Shipping Hub" />
+                    </div>
                 </div>
-
-            <div id="gameFinancialInfo">
-                <p>Players: <span id="gamePlayerCount">0</span></p>
-                <p>Total Pot: $<span id="gameTotalPot">0</span></p>
-                <p>Winner's Payout: $<span id="gameWinnerPayout">0</span></p>
-            </div>
+                <div class="row" style="margin-top:8px">
+                    <div style="flex:1">
+                        <label for="payeeEmail">e‑Transfer Email</label>
+                        <input id="payeeEmail" class="input mono" placeholder="you@email.com" value="pay@yourdomain.com" />
+                    </div>
+                    <div style="flex:1">
+                        <label for="entryFee">Entry Fee (CAD)</label>
+                        <input id="entryFee" class="input" type="number" min="1" step="1" value="5" />
+                    </div>
+                </div>
+                <div class="row" style="margin-top:8px">
+                    <div style="flex:1">
+                        <label for="prizeNote">Prize Distribution</label>
+                        <input id="prizeNote" class="input" value="80% prizes • 20% host" />
+                    </div>
+                </div>
+                <div class="callout" style="margin-top:12px">
+                    <div><b>How to Pay</b></div>
+                    <ol style="margin:8px 0 0 18px; color:var(--muted)">
+                        <li>Open your banking app → Interac e‑Transfer.</li>
+                        <li>Recipient: <span id="showEmail" class="mono">pay@yourdomain.com</span></li>
+                        <li>Amount: <span id="showFee" class="mono">$5</span> CAD per card.</li>
+                        <li>Message: <span class="mono">BINGO <span id="showGame">(Game ID)</span> + Your Name</span></li>
+                    </ol>
+                </div>
+                <div class="row" style="margin-top:12px">
+                    <button class="btn" onclick="copyPayment()">Copy Payment Info</button>
+                    <button class="btn secondary" onclick="openModal('policyModal')">Policy</button>
+                </div>
+            </aside>
         </div>
 
-        <div id="bingo-view" class="game-view">
-            <h1>BINGO!</h1>
-            <p><span id="bingoWinnerName"></span> has called BINGO!</p>
-            <p>Please pause and manually verify their card.</p>
-            <div style="text-align: center;">
-                 <button id="newGameBtn" class="host-only">Start New Game</button>
-            </div>
-        </div>
+        <p class="muted" style="margin:18px 6px 0">Built for small community games. Do not use for unlawful gambling. See Policy.</p>
     </div>
 
+    <dialog id="rulesModal" class="card panel">
+        <h3 style="margin:0 0 8px 0">Game Rules (Quick)</h3>
+        <ul class="muted" style="margin-top:6px">
+            <li>75‑ball bingo. Columns: B(1‑15), I(16‑30), N(31‑45), G(46‑60), O(61‑75).</li>
+            <li>Center is FREE space.</li>
+            <li>Winning patterns: Single Line, Double Line, Full House.</li>
+            <li>Host calls numbers using the Caller screen and shares a live view.</li>
+            <li>Players must mark their own cards and claim wins promptly with a screenshot.</li>
+        </ul>
+        <div class="row" style="margin-top:10px;justify-content:flex-end"><button class="btn" onclick="closeModal('rulesModal')">Close</button></div>
+    </dialog>
 
-    <script src="https://www.gstatic.com/firebasejs/10.10.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.10.0/firebase-auth-compat.js"></script>
+    <dialog id="payoutModal" class="card panel">
+        <h3 style="margin:0 0 8px 0">E‑Transfer & Prizes</h3>
+        <p class="muted">Send your entry via Interac e‑Transfer before the round starts. Include the Game ID and your name in the message. Payouts are sent by the host after win verification.</p>
+        <div class="row" style="margin-top:10px;justify-content:flex-end"><button class="btn" onclick="closeModal('payoutModal')">Close</button></div>
+    </dialog>
+
+    <dialog id="policyModal" class="card panel">
+        <h3 style="margin:0 0 8px 0">Policy & Disclaimer</h3>
+        <p class="muted">This site is for entertainment with friends/community. You are responsible for complying with local laws and platform rules. Keep it friendly and responsible. Suggested age 18+. No refunds after a round begins.</p>
+        <div class="row" style="margin-top:10px;justify-content:flex-end"><button class="btn" onclick="closeModal('policyModal')">Close</button></div>
+    </dialog>
 
     <script>
-        // ** YOU MUST REPLACE THIS WITH YOUR FIREBASE PROJECT'S CONFIGURATION **
-        // Go to Firebase Console -> Project Settings -> General -> Your apps -> Firebase SDK snippet (Config)
-        const firebaseConfig = {
-          apiKey: "YOUR_API_KEY",
-          authDomain: "YOUR_AUTH_DOMAIN",
-          projectId: "YOUR_PROJECT_ID",
-          storageBucket: "YOUR_STORAGE_BUCKET",
-          messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-          appId: "YOUR_APP_ID"
-        };
+        const $ = sel => document.querySelector(sel);
+        const $$ = sel => Array.from(document.querySelectorAll(sel));
 
-        // Initialize Firebase
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
-        const auth = firebase.auth();
-
-        let gameRef; // Reference to the current game document in Firestore
-        let userId; // Current user's Firebase Auth UID
-        let playerName; // Store player's name once joined
-        const gameId = 'myFirstBingoGame'; // Fixed game ID for this single-file example
-
-        // --- UI Elements ---
-        const lobbyView = document.getElementById('lobby-view');
-        const gameView = document.getElementById('game-view');
-        const bingoView = document.getElementById('bingo-view');
-
-        const joinSection = document.getElementById('joinSection');
-        const playerNameInput = document.getElementById('playerNameInput');
-        const joinGameBtn = document.getElementById('joinGameBtn');
-        const waitingMessageDiv = document.getElementById('waitingMessage');
-
-        const waitingPlayerListDiv = document.getElementById('waitingPlayerList');
-        const approvedPlayerListDiv = document.getElementById('approvedPlayerList');
-
-        const financialInfo = document.getElementById('financialInfo'); // Reference the container
-        const playerCountSpan = document.getElementById('playerCount');
-        const totalPotSpan = document.getElementById('totalPot');
-        const winnerPayoutSpan = document.getElementById('winnerPayout');
-        const startGameBtn = document.getElementById('startGameBtn');
-
-        const currentNumberDisplay = document.getElementById('currentNumberDisplay');
-        const callNumberBtn = document.getElementById('callNumberBtn');
-        const bingoBtn = document.getElementById('bingoBtn');
-        const calledNumbersListDiv = document.getElementById('calledNumbersList');
-        const gameFinancialInfo = document.getElementById('gameFinancialInfo'); // Reference the container
-        const gamePlayerCountSpan = document.getElementById('gamePlayerCount');
-        const gameTotalPotSpan = document.getElementById('gameTotalPot');
-        const gameWinnerPayoutSpan = document.getElementById('gameWinnerPayout');
-
-        const bingoWinnerNameSpan = document.getElementById('bingoWinnerName');
-        const newGameBtn = document.getElementById('newGameBtn');
-
-        // --- Helper Function to Show/Hide UI Views ---
-        function showView(viewId) {
-            lobbyView.style.display = 'none';
-            gameView.style.display = 'none';
-            bingoView.style.display = 'none';
-            const viewElement = document.getElementById(viewId);
-            if(viewElement) {
-                viewElement.style.display = 'block';
-            } else {
-                console.error("View element not found:", viewId);
-            }
+        function openModal(id) {
+            $("#" + id).showModal();
         }
 
-        // --- Financial Calculation and Display Function ---
-        function updateFinancialDisplay(numApprovedPlayers) {
-            const contribution = 50;
-            const totalPot = numApprovedPlayers * contribution;
-            const winnerPayout = totalPot * 0.80; // 20% deducted means 80% remains
-
-            playerCountSpan.textContent = numApprovedPlayers;
-            totalPotSpan.textContent = totalPot.toFixed(0); // Display as whole number
-            winnerPayoutSpan.textContent = winnerPayout.toFixed(0);
-
-            gamePlayerCountSpan.textContent = numApprovedPlayers;
-            gameTotalPotSpan.textContent = totalPot.toFixed(0);
-            gameWinnerPayoutSpan.textContent = winnerPayout.toFixed(0);
+        function closeModal(id) {
+            $("#" + id).close();
         }
 
-        // --- Check if the current user is the host ---
-        async function isHost() {
-            if (!gameRef || !userId) return false;
-            try {
-                const gameDoc = await gameRef.get();
-                if (!gameDoc.exists) return false;
-                return gameDoc.data().hostId === userId;
-            } catch (error) {
-                console.error("Error checking host status:", error);
-                return false;
-            }
-        }
-
-
-        // --- Join Game Logic ---
-        joinGameBtn.addEventListener('click', async () => {
-            const inputName = playerNameInput.value.trim();
-            if (!inputName) {
-                alert('Please enter your name.');
-                return;
-            }
-            playerName = inputName; // Store name
-            joinGameBtn.disabled = true; // Prevent double clicks
-            playerNameInput.disabled = true;
-
-            try {
-                // Simple Anonymous Auth - get a unique ID for the user session
-                const userCredential = await auth.signInAnonymously();
-                userId = userCredential.user.uid;
-                 console.log("Authenticated with Firebase. User ID:", userId);
-
-
-                gameRef = db.collection('games').doc(gameId);
-
-                const gameDoc = await gameRef.get();
-                const playerEntry = {
-                    name: playerName,
-                    joinedAt: firebase.firestore.FieldValue.serverTimestamp()
-                };
-
-                if (!gameDoc.exists) {
-                    // Create new game - First player becomes host and is auto-approved
-                    console.log("Game does not exist. Creating new game.");
-                    await gameRef.set({
-                        state: 'lobby',
-                        hostId: userId, // Set creator as host
-                        approvedPlayers: { [userId]: playerEntry },
-                        waitingPlayers: {}, // Start with empty waiting list
-                        calledNumbers: [],
-                        currentNumber: null,
-                        numberPool: Array.from({length: 75}, (_, i) => i + 1), // [1, 2, ..., 75]
-                        bingoCallerId: null
-                    });
-                    console.log("New game created. You are the host.");
-                    // Host is auto-approved, no waiting message needed for them initially
-                } else {
-                    // Join existing game
-                    const gameData = gameDoc.data();
-                    console.log("Game exists. State:", gameData.state);
-                     // Check game state - only join if in lobby
-                    if (gameData.state !== 'lobby') {
-                        alert('Game is already in progress or finished.');
-                        auth.signOut(); // Sign out anonymous user
-                        joinGameBtn.disabled = false;
-                        playerNameInput.disabled = false;
-                        return;
-                    }
-
-                    // Check if already in approved or waiting lists
-                    if ((gameData.approvedPlayers && gameData.approvedPlayers[userId]) || (gameData.waitingPlayers && gameData.waitingPlayers[userId])) {
-                         console.log("You are already in this game based on user ID.");
-                         // Do nothing, listener will handle showing the correct view
-                         // If already in game, might want to re-enable input/button temporarily
-                         joinGameBtn.disabled = false;
-                         playerNameInput.disabled = false; // Or keep disabled if user is shown as joined
-                    } else {
-                         // Add player to the waiting list
-                        console.log("Adding player to waiting list.");
-                        await gameRef.update({
-                            [`waitingPlayers.${userId}`]: {
-                                name: playerName,
-                                requestedAt: firebase.firestore.FieldValue.serverTimestamp()
-                            }
-                        });
-                        console.log("Player added to waiting list.");
-                        // Show waiting message immediately
-                        joinSection.style.display = 'none';
-                        waitingMessageDiv.style.display = 'block';
-                    }
-                }
-
-                // Start listening for game state changes regardless of creation or joining attempt
-                listenForGameUpdates();
-
-            } catch (error) {
-                console.error("Error joining game:", error);
-                alert("Failed to join game. Please try again.");
-                 // If sign-in failed or database write failed, reset UI
-                if (userId) { auth.signOut(); userId = null; } // Sign out if auth succeeded but write failed
-                joinGameBtn.disabled = false;
-                playerNameInput.disabled = false;
-                joinSection.style.display = 'block'; // Show join section again
-                waitingMessageDiv.style.display = 'none'; // Hide waiting message
-            }
-        });
-
-        // --- Listen for Game State Changes from Firebase ---
-        function listenForGameUpdates() {
-            if (!gameRef) {
-                console.error("Game reference not set.");
-                return;
-            }
-
-            gameRef.onSnapshot(async (docSnapshot) => {
-                if (!docSnapshot.exists) {
-                    console.error("Game document deleted.");
-                    alert("The game was deleted by the host.");
-                    window.location.reload(); // Simple reset
+        const HOST_PASSWORD = "your-secret-password";
+        function switchTab(tab) {
+            if (tab === 'host') {
+                const password = prompt("Enter the host password:");
+                if (password !== HOST_PASSWORD) {
+                    alert("Incorrect password. Access denied.");
                     return;
                 }
+            }
+            $("#tabPlayer").classList.toggle('active', tab === 'player');
+            $("#tabHost").classList.toggle('active', tab === 'host');
+            $("#playerView").classList.toggle('hidden', tab !== 'player');
+            $("#hostView").classList.toggle('hidden', tab !== 'host');
+        }
 
-                const gameData = docSnapshot.data();
-                const approvedPlayers = gameData.approvedPlayers || {};
-                const waitingPlayers = gameData.waitingPlayers || {};
-                const numApprovedPlayers = Object.keys(approvedPlayers).length;
-                const isCurrentUserHost = await isHost();
+        function updatePaymentPreview() {
+            $("#showEmail").textContent = $("#payeeEmail").value.trim() || 'you@email.com';
+            $("#showFee").textContent = `$${($("#entryFee").value || '0')}`;
+            const gid = $("#hostGameId").value.trim() || $("#gameId").value.trim() || '—';
+            $("#showGame").textContent = gid;
+            localStorage.setItem('qb_payee', JSON.stringify({
+                name: $("#payeeName").value,
+                email: $("#payeeEmail").value,
+                fee: $("#entryFee").value,
+                prize: $("#prizeNote").value
+            }));
+        }
 
-                // Determine current user's status
-                const isCurrentUserApproved = approvedPlayers[userId] !== undefined;
-                const isCurrentUserWaiting = waitingPlayers[userId] !== undefined;
-                const isCurrentUserKnown = isCurrentUserApproved || isCurrentUserWaiting; // Are they in either list?
+        $$("#payeeName, #payeeEmail, #entryFee, #prizeNote").forEach(el => {
+            el.addEventListener('input', updatePaymentPreview);
+        });
 
-
-                // --- Update Lobby View based on Approval Status and Role ---
-                if (gameData.state === 'lobby') {
-                     showView('lobby-view');
-
-                     // Show/hide join section and waiting message based on user's status
-                     joinSection.style.display = isCurrentUserKnown ? 'none' : 'block';
-                     waitingMessageDiv.style.display = isCurrentUserWaiting ? 'block' : 'none';
-                     // If the user *is* approved, they don't see the waiting message or join section
-                     if (isCurrentUserApproved) {
-                         joinSection.style.display = 'none';
-                         waitingMessageDiv.style.display = 'none';
-                     }
-
-
-                     // Update financial info based *only* on approved players
-                     updateFinancialDisplay(numApprovedPlayers);
-
-                     // Render Approved Players list
-                     approvedPlayerListDiv.innerHTML = '<h3>Approved Players:</h3>' +
-                         (Object.keys(approvedPlayers).length === 0 ? '<p>No players approved yet.</p>' :
-                          Object.values(approvedPlayers).map(p => `<div><span>${p.name}</span></div>`).join(''));
-
-                     // Render Waiting Players list
-                     let waitingHtml = '<h3>Players Waiting for Approval:</h3>';
-                     if (Object.keys(waitingPlayers).length === 0) {
-                         waitingHtml += '<p>No players waiting.</p>';
-                     } else {
-                          Object.entries(waitingPlayers).forEach(([waitingId, waitingPlayer]) => {
-                              waitingHtml += `
-                                 <div data-user-id="${waitingId}">
-                                     <span>${waitingPlayer.name}</span>
-                                     ${isCurrentUserHost ?
-                                        `<div>
-                                            <button class="approve-btn">Approve</button>
-                                            <button class="reject-btn">Reject</button>
-                                        </div>`
-                                        : ''}
-                                 </div>
-                             `;
-                          });
-                     }
-                     waitingPlayerListDiv.innerHTML = waitingHtml;
-
-
-                     // Show/hide start game button based on host role and approved player count
-                     startGameBtn.style.display = isCurrentUserHost ? 'block' : 'none';
-                     startGameBtn.disabled = numApprovedPlayers < 4; // Disable if not enough approved players
-
-
-                } else { // If not in lobby state (game is running or bingo called)
-                    // Ensure only approved players see the game or bingo view
-                    if(isCurrentUserApproved) {
-                         // Hide lobby-specific elements
-                         joinSection.style.display = 'none';
-                         waitingMessageDiv.style.display = 'none';
-                         financialInfo.style.display = 'none'; // Hide lobby financial info
-                         startGameBtn.style.display = 'none'; // Hide start button
-
-                         if (gameData.state === 'calling') {
-                              showView('game-view');
-                              currentNumberDisplay.textContent = gameData.currentNumber ? `Calling: ${gameData.currentNumber}` : 'Game Started! Waiting for first number...';
-                              calledNumbersListDiv.innerHTML = `<strong>Called:</strong> ${gameData.calledNumbers.join(', ')}`;
-                              // Show/hide buttons based on role
-                              callNumberBtn.style.display = isCurrentUserHost ? 'inline-block' : 'none';
-                              bingoBtn.style.display = isCurrentUserHost ? 'none' : 'inline-block'; // Players see BINGO button
-                              gameFinancialInfo.style.display = 'block'; // Show game financial info
-
-                         } else if (gameData.state === 'bingo_called') {
-                             showView('bingo-view');
-                             const callerPlayer = approvedPlayers[gameData.bingoCallerId]; // Get winner from approved list
-                             bingoWinnerNameSpan.textContent = callerPlayer ? callerPlayer.name : 'Someone (ID: ' + gameData.bingoCallerId + ')';
-                             // Host sees the option to start a new game
-                             newGameBtn.style.display = isCurrentUserHost ? 'inline-block' : 'none';
-                              gameFinancialInfo.style.display = 'block'; // Show game financial info
-
-                         } else {
-                             // Handle other potential game states or finished state if needed
-                             console.warn("Unhandled game state for approved player:", gameData.state);
-                             // Maybe show a generic game in progress view or redirect
-                         }
-
-
-                    } else if (isCurrentUserWaiting) {
-                        // Player is waiting but game started - keep them in lobby view with a message
-                         showView('lobby-view');
-                         joinSection.style.display = 'none';
-                         waitingMessageDiv.style.display = 'block';
-                         // Update lists/info to reflect game is in progress
-                         waitingPlayerListDiv.innerHTML = '<h3>Players Waiting for Approval:</h3><p>Game is in progress. Your request may be considered for the next game.</p>';
-                         approvedPlayerListDiv.innerHTML = '<h3>Approved Players:</h3><p>Game in progress...</p>';
-                         financialInfo.style.display = 'none'; // Hide financial info during game if waiting
-                         startGameBtn.style.display = 'none';
-
-                    } else {
-                         // Not approved, not waiting, and game started (e.g., arrived late or refreshed)
-                         // Show lobby view but indicate game is in progress
-                         showView('lobby-view');
-                         joinSection.style.display = 'block'; // Allow them to try joining again (for next game)
-                         waitingMessageDiv.style.display = 'none';
-                         approvedPlayerListDiv.innerHTML = '<h3>Approved Players:</h3><p>Game currently in progress.</p>';
-                         waitingPlayerListDiv.innerHTML = ''; // Clear waiting list view for late arrivals
-                         financialInfo.style.display = 'none';
-                         startGameBtn.style.display = 'none';
-                         console.log("User is not in game lists, and game state is not lobby.");
-                    }
-                }
-
-
-            }, (error) => {
-                console.error("Error listening to game updates:", error);
-                alert("Connection error. Please try reloading.");
-                 // Attempt to sign out anonymous user on error
-                auth.signOut();
-                userId = null;
-                // Reset UI state
-                showView('lobby-view');
-                joinSection.style.display = 'block';
-                waitingMessageDiv.style.display = 'none';
-                joinGameBtn.disabled = false;
-                playerNameInput.disabled = false;
-                 approvedPlayerListDiv.innerHTML = '<h3>Approved Players:</h3><p>Connection error.</p>';
-                 waitingPlayerListDiv.innerHTML = '<h3>Players Waiting for Approval:</h3><p>Connection error.</p>';
-                 financialInfo.style.display = 'block'; // Show back financial section
-                 startGameBtn.style.display = 'none'; // Ensure start button hidden on error
+        function copyPayment() {
+            const pay = {
+                name: $("#payeeName").value.trim(),
+                email: $("#payeeEmail").value.trim(),
+                fee: $("#entryFee").value.trim(),
+                prize: $("#prizeNote").value.trim(),
+                game: $("#hostGameId").value.trim() || $("#gameId").value.trim()
+            };
+            const txt = `Interac e‑Transfer\nRecipient: ${pay.name} <${pay.email}>\nAmount: $${pay.fee} CAD per card\nMessage: BINGO ${pay.game || ''} + Your Name\nPrize: ${pay.prize}`;
+            navigator.clipboard.writeText(txt).then(() => {
+                toast('Payment info copied');
             });
         }
 
-        // --- Event Delegation for Approve/Reject Buttons (since they are added dynamically) ---
-        waitingPlayerListDiv.addEventListener('click', async (event) => {
-            if (!await isHost()) return; // Only host actions
-            console.log("Host interaction in waiting list.");
+        function toast(msg) {
+            const t = document.createElement('div');
+            t.textContent = msg;
+            t.setAttribute('role', 'status');
+            t.style.position = 'fixed';
+            t.style.bottom = '16px';
+            t.style.left = '50%';
+            t.style.transform = 'translateX(-50%)';
+            t.style.padding = '10px 14px';
+            t.style.background = 'rgba(0,0,0,.7)';
+            t.style.border = '1px solid rgba(255,255,255,.15)';
+            t.style.color = 'white';
+            t.style.borderRadius = '10px';
+            t.style.zIndex = '999';
+            document.body.appendChild(t);
+            setTimeout(() => t.remove(), 1600);
+        }
 
-            const target = event.target;
-            // Find the closest parent div with the data-user-id attribute
-            const playerDiv = target.closest('div[data-user-id]');
-            if (!playerDiv) return;
+        const cardState = {
+            cells: [],
+            called: new Set(),
+            gridEl: $("#cardGrid"),
+            cardID: null,
+            playerName: null
+        };
 
-            const userIdToManage = playerDiv.dataset.userId;
-             console.log("Action on user ID:", userIdToManage);
+        function buildRanges() {
+            return [
+                [1, 15],
+                [16, 30],
+                [31, 45],
+                [46, 60],
+                [61, 75]
+            ];
+        }
 
+        function generateColumn(range, count) {
+            const [a, b] = range;
+            const nums = [];
+            for (let i = a; i <= b; i++) nums.push(i);
+            const shuffled = nums.sort(() => Math.random() - 0.5);
+            return shuffled.slice(0, count).sort((x, y) => x - y);
+        }
 
-            if (target.classList.contains('approve-btn')) {
-                console.log("Attempting to approve:", userIdToManage);
-                // Disable buttons temporarily to prevent double clicks
-                 playerDiv.querySelectorAll('button').forEach(btn => btn.disabled = true);
+        function generateCard() {
+            const name = $("#playerName").value.trim();
+            const gid = $("#gameId").value.trim();
+            if (!name || name.length < 2) {
+                toast('Please enter your name');
+                return;
+            }
+            if (!gid || gid.length < 2) {
+                toast('Please enter a Game ID');
+                return;
+            }
+            
+            $("#generateBtn").disabled = true;
 
-                try {
-                    const gameDoc = await gameRef.get();
-                    const gameData = gameDoc.data();
-                    const playerToApprove = gameData.waitingPlayers[userIdToManage];
+            const cardDataString = `${name}|${gid}`;
+            const cardID = btoa(cardDataString).toUpperCase().substring(0, 5);
 
-                    if (playerToApprove) {
-                        // Use a batched write for atomicity: Add to approved, remove from waiting
-                        const batch = db.batch();
+            cardState.cardID = cardID;
+            cardState.playerName = name;
 
-                        const approvedPlayerEntry = {
-                             name: playerToApprove.name, // Use name from waiting list
-                             joinedAt: firebase.firestore.FieldValue.serverTimestamp() // Set join time now
-                        };
+            const ranges = buildRanges();
+            const columns = [
+                generateColumn(ranges[0], 5),
+                generateColumn(ranges[1], 5),
+                generateColumn(ranges[2], 5),
+                generateColumn(ranges[3], 5),
+                generateColumn(ranges[4], 5),
+            ];
+            columns[2][2] = 'FREE';
 
-                        batch.set(gameRef.collection('approvedPlayers').doc(userIdToManage), approvedPlayerEntry); // Use subcollection if preferred, or map update
-                         // Sticking with map update for simplicity as in previous schema
-                         batch.set(gameRef, { approvedPlayers: { [userIdToManage]: approvedPlayerEntry } }, { merge: true });
+            cardState.cells = [];
+            cardState.gridEl.innerHTML = '';
+            for (let r = 0; r < 5; r++) {
+                for (let c = 0; c < 5; c++) {
+                    const idx = r * 5 + c;
+                    const val = columns[c][r];
+                    const cell = {
+                        n: val,
+                        marked: val === 'FREE',
+                        free: val === 'FREE',
+                        r,
+                        c
+                    };
+                    cardState.cells.push(cell);
 
-                        batch.update(gameRef, { [`waitingPlayers.${userIdToManage}`]: firebase.firestore.FieldValue.delete() }); // Remove from waiting
-
-                        await batch.commit();
-                        console.log("Player approved:", userIdToManage);
-                        // UI updates handled by the snapshot listener
-                    } else {
-                        console.warn("Player not found in waiting list:", userIdToManage);
-                         alert("Player not found in waiting list.");
-                    }
-                } catch (error) {
-                    console.error("Error approving player:", error);
-                    alert("Failed to approve player.");
-                    // Re-enable buttons on failure
-                    playerDiv.querySelectorAll('button').forEach(btn => btn.disabled = false);
+                    const div = document.createElement('div');
+                    div.className = 'cell' + (cell.free ? ' free marked' : '');
+                    div.textContent = (cell.n === 'FREE') ? '★ FREE' : cell.n;
+                    div.setAttribute('role', 'button');
+                    div.setAttribute('aria-pressed', cell.marked ? 'true' : 'false');
+                    div.addEventListener('click', () => toggleMark(idx, div));
+                    cardState.gridEl.appendChild(div);
                 }
-
-            } else if (target.classList.contains('reject-btn')) {
-                 console.log("Attempting to reject:", userIdToManage);
-                 // Disable buttons temporarily
-                 playerDiv.querySelectorAll('button').forEach(btn => btn.disabled = true);
-
-                 try {
-                    // Just remove from waiting list
-                    await gameRef.update({
-                        [`waitingPlayers.${userIdToManage}`]: firebase.firestore.FieldValue.delete()
-                    });
-                    console.log("Player rejected:", userIdToManage);
-                    // UI updates handled by the snapshot listener
-                    // Optional: In a real app, you might also sign out the anonymous user associated with this ID if they were rejected.
-                 } catch (error) {
-                    console.error("Error rejecting player:", error);
-                    alert("Failed to reject player.");
-                     // Re-enable buttons on failure
-                    playerDiv.querySelectorAll('button').forEach(btn => btn.disabled = false);
-                 }
             }
-        });
+            $("#cardDetails").innerHTML = `<b>Game ID:</b> ${gid} • <b>Player:</b> ${name} • <b>Card ID:</b> <span class="mono">${cardID}</span>`;
+            updateStatus();
+            localStorage.setItem('qb_player', JSON.stringify({
+                name,
+                gid,
+                cardID
+            }));
+            toast('Card generated');
+        }
 
+        function resetCard() {
+            cardState.cells = [];
+            cardState.gridEl.innerHTML = '';
+            $("#status").innerHTML = 'No bingo yet';
+            $("#status").style.borderColor = 'rgba(255,255,255,.12)';
+            $("#cardDetails").innerHTML = '';
+            cardState.cardID = null;
+            cardState.playerName = null;
+            $("#generateBtn").disabled = false;
+            toast('Card and player data reset.');
+        }
 
-        // --- Start Game Logic (Host Only) ---
-        startGameBtn.addEventListener('click', async () => {
-            if (!gameRef || !(await isHost())) return; // Ensure only host can start
-            startGameBtn.disabled = true; // Prevent double clicks
-             console.log("Host attempting to start game.");
+        function toggleMark(idx, el) {
+            const cell = cardState.cells[idx];
+            if (!cell || cell.free) return;
+            cell.marked = !cell.marked;
+            el.classList.toggle('marked', cell.marked);
+            el.setAttribute('aria-pressed', cell.marked ? 'true' : 'false');
+            updateStatus();
+        }
 
-            try {
-                const gameDoc = await gameRef.get();
-                const approvedPlayers = gameDoc.data().approvedPlayers || {};
-                const numApprovedPlayers = Object.keys(approvedPlayers).length;
-                 if (numApprovedPlayers < 4) {
-                     alert("You need at least 4 approved players to start the game.");
-                     startGameBtn.disabled = false; // Re-enable if check fails
-                     return;
-                 }
+        function checkLines() {
+            if (cardState.cells.length !== 25) return {
+                lines: 0,
+                full: false
+            };
+            const marked = (r, c) => cardState.cells[r * 5 + c].marked;
+            let lines = 0;
+            for (let r = 0; r < 5; r++)
+                if ([0, 1, 2, 3, 4].every(c => marked(r, c))) lines++;
+            for (let c = 0; c < 5; c++)
+                if ([0, 1, 2, 3, 4].every(r => marked(r, c))) lines++;
+            if ([0, 1, 2, 3, 4].every(i => marked(i, i))) lines++;
+            if ([0, 1, 2, 3, 4].every(i => marked(i, 4 - i))) lines++;
+            const full = cardState.cells.every(x => x.marked);
+            return {
+                lines,
+                full
+            };
+        }
 
-                await gameRef.update({
-                    state: 'calling',
-                    // Initialize number pool (and shuffle) - ensure this is done reliably
-                    numberPool: Array.from({length: 75}, (_, i) => i + 1).sort(() => Math.random() - 0.5),
-                    calledNumbers: [],
-                    currentNumber: null,
-                    bingoCallerId: null, // Reset for the new game
-                    waitingPlayers: {} // Clear any remaining waiting players when game starts
-                });
-                 console.log("Game state set to 'calling'.");
-                 // Button re-enabled by snapshot listener update
-
-            } catch (error) {
-                 console.error("Error starting game:", error);
-                 alert("Failed to start game.");
-                 startGameBtn.disabled = false; // Re-enable button on failure
-            }
-        });
-
-        // --- Call Number Logic (Host Only) ---
-        callNumberBtn.addEventListener('click', async () => {
-            if (!gameRef || !(await isHost())) return; // Ensure only host can call
-            callNumberBtn.disabled = true; // Prevent double clicks
-             console.log("Host attempting to call number.");
-
-            try {
-                const gameDoc = await gameRef.get();
-                const gameData = gameDoc.data();
-                let pool = gameData.numberPool || [];
-                let called = gameData.calledNumbers || [];
-
-                if (pool.length === 0) {
-                    alert('All numbers have been called!');
-                    callNumberBtn.disabled = false;
-                    return;
-                }
-
-                // Select the next number from the pre-shuffled pool (using shift modifies array)
-                const calledNumber = pool.shift();
-                called.push(calledNumber);
-
-                await gameRef.update({
-                    currentNumber: calledNumber,
-                    calledNumbers: called,
-                    numberPool: pool // Update the remaining pool in Firebase
-                });
-                 console.log("Called number:", calledNumber);
-                 // Button re-enabled by snapshot listener update
-
-            } catch (error) {
-                 console.error("Error calling number:", error);
-                 alert("Failed to call number.");
-                 callNumberBtn.disabled = false; // Re-enable button on failure
-            }
-        });
-
-        // --- BINGO! Logic (Player Only) ---
-        bingoBtn.addEventListener('click', async () => {
-             if (!gameRef || await isHost()) return; // Ensure only non-hosts can call BINGO
-             bingoBtn.disabled = true; // Prevent double clicks
-             console.log("Player attempting to call BINGO.");
-
-             try {
-                 // Simple implementation: just update state and caller ID
-                 // Verification is manual visually by other players/host
-                 await gameRef.update({
-                     state: 'bingo_called',
-                     bingoCallerId: userId // Store who called bingo
-                     // Optional: store a snapshot of calledNumbers at this moment for verification
-                 });
-                 console.log("BINGO called by:", userId);
-                 // Button stays disabled until new game starts or page reloads
-             } catch (error) {
-                 console.error("Error calling BINGO:", error);
-                 alert("Failed to call BINGO.");
-                 bingoBtn.disabled = false; // Re-enable button on failure
-             }
-        });
-
-        // --- Start New Game Logic (Host Only in BINGO view) ---
-        newGameBtn.addEventListener('click', async () => {
-             if (!gameRef || !(await isHost())) return; // Ensure only host can start new game
-             newGameBtn.disabled = true; // Prevent double clicks
-             console.log("Host attempting to start new game.");
-
-             try {
-                 // Reset game state but keep approved players and host ID
-                 await gameRef.update({
-                     state: 'lobby', // Go back to lobby state
-                     calledNumbers: [], // Reset game data
-                     currentNumber: null,
-                     numberPool: Array.from({length: 75}, (_, i) => i + 1).sort(() => Math.random() - 0.5), // Reset & shuffle pool
-                     bingoCallerId: null,
-                     waitingPlayers: {} // Clear the waiting list for the new game
-                 });
-                 console.log("New game started in lobby state.");
-                 // Button re-enabled by snapshot listener update
-             } catch (error) {
-                 console.error("Error starting new game:", error);
-                 alert("Failed to start new game.");
-                 newGameBtn.disabled = false; // Re-enable button on failure
-             }
-        });
-
-        // --- Initial Setup ---
-        // Check auth state on load. If already authenticated anonymously, try to join.
-        auth.onAuthStateChanged(async (user) => {
-            if (user) {
-                userId = user.uid;
-                 console.log("onAuthStateChanged: Authenticated with Firebase. User ID:", userId);
-                 // Check if this user is already in the fixed game, then start listening.
-                 // This prevents users who reload from having to click "Join" again if they were already in.
-                 gameRef = db.collection('games').doc(gameId);
-                 const gameDoc = await gameRef.get();
-                 if (gameDoc.exists) {
-                      const gameData = gameDoc.data();
-                       if ((gameData.approvedPlayers && gameData.approvedPlayers[userId]) || (gameData.waitingPlayers && gameData.waitingPlayers[userId])) {
-                            console.log("User found in existing game lists. Starting listener.");
-                            // Restore player name if possible (not stored persistently in this version)
-                             // For simplicity, they might still need to enter name if they weren't approved/waiting
-                            listenForGameUpdates();
-                            // Hide join section if user is known
-                             joinSection.style.display = 'none';
-                             waitingMessageDiv.style.display = (gameData.waitingPlayers && gameData.waitingPlayers[userId]) ? 'block' : 'none';
-                            return; // Exit if user is found and listener started
-                       }
-                 }
-
-                 // If user is authenticated but not in *this* game, or game doesn't exist
-                 console.log("User authenticated but not found in game. Showing join screen.");
-                 showView('lobby-view'); // Ensure lobby is visible
-                 joinSection.style.display = 'block'; // Show join input
-                 waitingMessageDiv.style.display = 'none'; // Hide waiting
-                 joinGameBtn.disabled = false;
-                 playerNameInput.disabled = false;
-
+        function updateStatus() {
+            const {
+                lines,
+                full
+            } = checkLines();
+            const badge = $("#status");
+            if (full) {
+                badge.innerHTML = '🎉 FULL HOUSE!';
+                badge.style.borderColor = 'rgba(34,197,94,.6)';
+            } else if (lines >= 2) {
+                badge.innerHTML = '✨ DOUBLE LINE!';
+                badge.style.borderColor = 'rgba(124,156,255,.6)';
+            } else if (lines >= 1) {
+                badge.innerHTML = '✅ SINGLE LINE!';
+                badge.style.borderColor = 'rgba(124,156,255,.6)';
             } else {
-                userId = null;
-                console.log("onAuthStateChanged: Not authenticated. Showing join screen.");
-                 // User is not authenticated (or signed out). Show join screen.
-                showView('lobby-view');
-                joinSection.style.display = 'block';
-                waitingMessageDiv.style.display = 'none';
-                 joinGameBtn.disabled = false;
-                 playerNameInput.disabled = false;
+                badge.innerHTML = 'No bingo yet';
+                badge.style.borderColor = 'rgba(255,255,255,.12)';
             }
-        });
+        }
 
-        // Initial display setup (might be overridden by onAuthStateChanged)
-        showView('lobby-view');
+        function claimBingo() {
+            const name = cardState.playerName || $("#playerName").value.trim() || 'Player';
+            const gid = $("#gameId").value.trim() || '—';
+            const cardID = cardState.cardID || '—';
+            const {
+                lines,
+                full
+            } = checkLines();
+            let tier = full ? 'FULL HOUSE' : (lines >= 2 ? 'DOUBLE LINE' : (lines >= 1 ? 'SINGLE LINE' : 'NO BINGO'));
+            if(tier === 'NO BINGO') {
+                toast('You don\'t have a winning pattern yet!');
+                return;
+            }
+            const msg = `BINGO CLAIM\nName: ${name}\nGame: ${gid}\nCard ID: ${cardID}\nStatus: ${tier}`;
+            navigator.clipboard.writeText(msg).then(() => toast('Claim copied. Paste in chat + send screenshot.'));
+        }
+
+        function togglePaste() {
+            $("#pasteWrap").classList.toggle('hidden');
+        }
+
+        function applyCalledFromPaste() {
+            const txt = $("#pasteInput").value.toUpperCase();
+            const nums = txt.match(/\b([BIOGN]?\s*\d{1,2})\b/g) || [];
+            const set = new Set(nums.map(s => parseInt(s.replace(/[^0-9]/g, ''), 10)).filter(n => n >= 1 && n <= 75));
+            cardState.cells.forEach((cell, idx) => {
+                if (typeof cell.n === 'number' && set.has(cell.n)) {
+                    cardState.cells[idx].marked = true;
+                    const div = cardState.gridEl.children[idx];
+                    if(div) {
+                        div.classList.add('marked');
+                        div.setAttribute('aria-pressed', 'true');
+                    }
+                }
+            });
+            updateStatus();
+            toast('Applied called numbers');
+        }
+
+        function clearCalled() {
+            $("#pasteInput").value = '';
+            toast('Cleared');
+        }
 
 
+
+    function downloadCardPNG() {
+        if (cardState.cells.length !== 25) {
+            toast('Generate a card first');
+            return;
+        }
+
+        const scale = 4, size = 500, pad = 20;
+        const c = document.createElement('canvas');
+        c.width = size * scale;
+        c.height = size * scale;
+        const ctx = c.getContext('2d');
+        ctx.scale(scale, scale);
+
+        // Background
+        ctx.fillStyle = '#0b1020';
+        ctx.fillRect(0, 0, size, size);
+        ctx.fillStyle = '#ffffff';
+        ctx.globalAlpha = .08;
+        ctx.fillRect(0, 0, size, size);
+        ctx.globalAlpha = 1;
+
+        // Card Details (NEW)
+        ctx.font = 'bold 16px Inter';
+        ctx.fillStyle = '#cfd8ff';
+        ctx.textAlign = 'left';
+        const name = cardState.playerName || 'Player';
+        const gid = $("#gameId").value.trim() || '—';
+        const cardID = cardState.cardID || '—';
+        ctx.fillText(`Game: ${gid}  |  Player: ${name}`, pad, pad + 18);
+        ctx.fillText(`Card ID: ${cardID}`, pad, pad + 38);
+
+        // Bingo Headings (B, I, N, G, O)
+        const headers = ['B', 'I', 'N', 'G', 'O'];
+        const headerY = pad + 60; // Adjusted for new text
+        for (let i = 0; i < 5; i++) {
+            ctx.fillStyle = '#cfd8ff';
+            ctx.font = 'bold 26px Inter';
+            ctx.textAlign = 'center';
+            ctx.fillText(headers[i], pad + (i + 0.5) * (size - pad * 2) / 5, headerY);
+        }
+
+        // Bingo Grid
+        const cell = (size - pad * 2) / 5;
+        const gridY = headerY + 16;
+        for (let r = 0; r < 5; r++) {
+            for (let cidx = 0; cidx < 5; cidx++) {
+                const i = r * 5 + cidx;
+                const val = cardState.cells[i].n;
+                const x = pad + (cidx + 0.5) * cell;
+                const y = gridY + (r + 1) * cell - 12;
+
+                ctx.strokeStyle = 'rgba(255,255,255,.25)';
+                ctx.strokeRect(pad + cidx * cell, gridY + r * cell, cell, cell);
+
+                if (val === 'FREE') {
+                    ctx.fillStyle = '#9ef0ff';
+                    ctx.font = 'bold 18px Inter';
+                    ctx.fillText('FREE', x, y);
+                } else {
+                    ctx.fillStyle = '#ffffff';
+                    ctx.font = 'bold 20px Inter';
+                    ctx.fillText(String(val), x, y);
+                }
+            }
+        }
+
+        // Download
+        const url = c.toDataURL('image/png');
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'bingo-card.png';
+        a.click();
+    }
+
+
+        const caller = {
+            deck: [],
+            called: [],
+        };
+
+        function startCaller() {
+            const gid = $("#hostGameId").value.trim();
+            if (!gid) {
+                toast('Enter a Game ID');
+                return;
+            }
+            const deck = Array.from({
+                length: 75
+            }, (_, i) => i + 1);
+            
+            function seededShuffle(array, seed) {
+                for (let i = array.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random(seed) * (i + 1));
+                    [array[i], array[j]] = [array[j], array[i]];
+                }
+                return array;
+            }
+            
+            caller.deck = seededShuffle(deck, gid);
+            caller.called = [];
+            renderBoard();
+            $("#lastCall").textContent = '—';
+            $("#btnNext").disabled = false;
+            $("#btnUndo").disabled = true;
+            $("#btnExport").disabled = true;
+            $("#history").textContent = '';
+            updatePaymentPreview();
+            toast('Caller ready');
+        }
+
+        function prefix(n) {
+            if (n <= 15) return 'B';
+            if (n <= 30) return 'I';
+            if (n <= 45) return 'N';
+            if (n <= 60) return 'G';
+            return 'O';
+        }
+
+        function drawNext() {
+            if (!caller.deck.length) {
+                toast('No more numbers');
+                return;
+            }
+            const n = caller.deck.shift();
+            caller.called.push(n);
+            $("#lastCall").textContent = prefix(n) + ' ' + n;
+            $("#btnUndo").disabled = false;
+            $("#btnExport").disabled = false;
+            renderBoard();
+            $("#history").textContent = caller.called.map(x => prefix(x) + x).join('  ');
+        }
+
+        function undoCall() {
+            const last = caller.called.pop();
+            if (last === undefined) return;
+            caller.deck.unshift(last);
+            $("#lastCall").textContent = caller.called.length ? (prefix(caller.called.at(-1)) + ' ' + caller.called.at(-1)) : '—';
+            $("#btnUndo").disabled = caller.called.length === 0;
+            $("#btnExport").disabled = caller.called.length === 0;
+            renderBoard();
+            $("#history").textContent = caller.called.map(x => prefix(x) + x).join('  ');
+        }
+
+        function renderBoard() {
+            const el = $("#board");
+            el.innerHTML = '';
+            for (let n = 1; n <= 75; n++) {
+                const d = document.createElement('div');
+                d.className = 'num';
+                d.textContent = n;
+                if (caller.called.includes(n)) d.classList.add('hit');
+                el.appendChild(d);
+            }
+        }
+
+        function copyShare() {
+            const gid = $("#hostGameId").value.trim();
+            const fee = $("#entryFee").value.trim();
+            const email = $("#payeeEmail").value.trim();
+            const txt = `Join HABESHA BINGO!\nGame ID: ${gid}\nEntry: $${fee} via e‑Transfer → ${email}\nHow to play: go to the site, choose Player, enter Game ID, generate card, and join the stream.`;
+            navigator.clipboard.writeText(txt).then(() => toast('Share text copied'));
+        }
+
+        function exportHistory() {
+            const blob = new Blob([caller.called.map(x => prefix(x) + x).join(', ')], {
+                type: 'text/plain'
+            });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = 'bingo-history.txt';
+            a.click();
+        }
+
+        function loadPrefs() {
+            const pay = JSON.parse(localStorage.getItem('qb_payee') || 'null');
+            if (pay) {
+                $("#payeeName").value = pay.name || '';
+                $("#payeeEmail").value = pay.email || '';
+                $("#entryFee").value = pay.fee || '';
+                $("#prizeNote").value = pay.prize || '';
+            }
+            updatePaymentPreview();
+
+            const p = JSON.parse(localStorage.getItem('qb_player') || 'null');
+            if (p) {
+                $("#playerName").value = p.name || '';
+                $("#gameId").value = p.gid || '';
+                if (p.cardID) {
+                    generateCardFromSeed(p.cardID, p.name, p.gid);
+                }
+            }
+        }
+
+        function generateCardFromSeed(cardID, name, gid) {
+            const ranges = buildRanges();
+            const columns = [
+                generateColumn(ranges[0], 5),
+                generateColumn(ranges[1], 5),
+                generateColumn(ranges[2], 5),
+                generateColumn(ranges[3], 5),
+                generateColumn(ranges[4], 5),
+            ];
+            columns[2][2] = 'FREE';
+
+            cardState.cells = [];
+            cardState.gridEl.innerHTML = '';
+            for (let r = 0; r < 5; r++) {
+                for (let c = 0; c < 5; c++) {
+                    const idx = r * 5 + c;
+                    const val = columns[c][r];
+                    const cell = {
+                        n: val,
+                        marked: val === 'FREE',
+                        free: val === 'FREE',
+                        r,
+                        c
+                    };
+                    cardState.cells.push(cell);
+
+                    const div = document.createElement('div');
+                    div.className = 'cell' + (cell.free ? ' free marked' : '');
+                    div.textContent = (cell.n === 'FREE') ? '★ FREE' : cell.n;
+                    div.setAttribute('role', 'button');
+                    div.setAttribute('aria-pressed', cell.marked ? 'true' : 'false');
+                    div.addEventListener('click', () => toggleMark(idx, div));
+                    cardState.gridEl.appendChild(div);
+                }
+            }
+            cardState.cardID = cardID;
+            cardState.playerName = name;
+            $("#cardDetails").innerHTML = `<b>Game ID:</b> ${gid} • <b>Player:</b> ${name} • <b>Card ID:</b> <span class="mono">${cardID}</span>`;
+            updateStatus();
+            $("#generateBtn").disabled = true;
+        }
+
+        // NEW VERIFICATION FUNCTION
+        function verifyCardID() {
+            const verifyName = $("#verifyName").value.trim();
+            const verifyID = $("#verifyCardID").value.trim().toUpperCase();
+            const hostGameId = $("#hostGameId").value.trim();
+
+            const statusEl = $("#verificationStatus");
+            statusEl.style.display = 'block';
+
+            if (!verifyName || !verifyID || !hostGameId) {
+                statusEl.innerHTML = '<span style="color:var(--danger)">Please fill out all fields.</span>';
+                return;
+            }
+
+            const cardDataString = `${verifyName}|${hostGameId}`;
+            const generatedCardID = btoa(cardDataString).toUpperCase().substring(0, 5);
+            
+            if (generatedCardID === verifyID) {
+                statusEl.innerHTML = `<span style="color:var(--accent); font-weight:700;">✅ VALID CARD ID!</span>`;
+            } else {
+                statusEl.innerHTML = `<span style="color:var(--danger); font-weight:700;">❌ INVALID CARD ID.</span><br>The ID for this name is: <span class="mono" style="color:var(--text)">${generatedCardID}</span>`;
+            }
+        }
+
+        function onReady() {
+            loadPrefs();
+            renderBoard();
+        }
+
+        document.addEventListener('DOMContentLoaded', onReady);
     </script>
 </body>
 </html>
