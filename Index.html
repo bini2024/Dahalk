@@ -3,19 +3,19 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>HABESHA bingo community</title>
+    <title>HABESHA Bingo community</title>
     <meta name="description" content="Lightweight online bingo you can host with friends. Cards generate in-browser. Caller & player views. No login.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root{
-            --bg:#ebc5c5;
-            --panel:#0094f0;
+            --bg:#0b1020;
+            --panel:#121936;
             --muted:#a7b0c4;
-            --text:#000000;
-            --brand:#0c0073;
-            --brand-2:#004170;
+            --text:#eef2ff;
+            --brand:#7c9cff;
+            --brand-2:#9ef0ff;
             --accent:#22c55e;
             --danger:#ef4444;
             --warning:#f59e0b;
@@ -92,14 +92,15 @@
         .switch button.active{background:rgba(124,156,255,.25)}
         .hidden{display:none}
         .mono{font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace}
+        .prize-display{font-size:2em; font-weight:bold; color:var(--accent)}
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>🎉 HABESHA Bingo</h1>
+            <h1> HABESHA Bingo</h1>
             <div class="row">
-                <span class="tag">No login • Host & Play • Works on phone</span>
+                <span class="tag">Bingo</span>
             </div>
         </div>
 
@@ -128,13 +129,17 @@
                                     <label for="gameId">Game ID (host shares)</label>
                                     <input id="gameId" class="input mono" placeholder="e.g., 482913" />
                                 </div>
+                                <div style="flex:1">
+                                    <label for="gameKey">Game Key (host gives you)</label>
+                                    <input id="gameKey" class="input mono" placeholder="e.g., secret-key" />
+                                </div>
                             </div>
                             <div class="row" style="margin-top:10px">
-                                <button id="generateBtn" class="btn" onclick="generateCard()">Generate Card</button>
+                                <button id="generateBtn" class="btn" onclick="generateCard()" disabled>Generate Card</button>
                                 <button class="btn secondary" onclick="resetCard()">Reset</button>
                                 <button class="btn success" onclick="claimBingo()">Claim Bingo</button>
                             </div>
-                            <p class="kicker">Tip: Enter the Game ID from your host so everyone plays the same round. Cards are unique to your name.</p>
+                            <p class="kicker">Tip: Enter the Game ID and Game Key from your host to get a unique, valid card.</p>
                             <div id="cardDetails" class="muted" style="margin-top: 10px; font-size: 14px;"></div>
                             <div id="cardArea" class="bingo-card" aria-live="polite" style="margin-top:14px">
                                 <div class="grid bingo-head" aria-hidden="true">
@@ -165,7 +170,7 @@
                             <div class="callout">
                                 <strong>How to play</strong>
                                 <ol style="margin:10px 0 0 18px; color:var(--muted)">
-                                    <li>Ask the host for the <b>Game ID</b> & entry fee.</li>
+                                    <li>Ask the host for the <b>Game ID</b>, <b>Game Key</b> & entry fee.</li>
                                     <li>Send entry via <b>e‑Transfer</b> (see E‑Transfer Info).</li>
                                     <li>Generate your card & join the live stream.</li>
                                     <li>Tap numbers as they are called. We auto-detect lines.</li>
@@ -219,7 +224,7 @@
                     
                     <div class="card panel" style="margin-top:16px">
                         <h3 style="margin:0 0 8px 0">Card Verifier</h3>
-                        <p class="muted" style="margin:0 0 10px 0">Enter a player's name and card ID to verify their claim.</p>
+                        <p class="muted" style="margin:0 0 10px 0">Enter a player's name, card ID, and the Game Key to verify their claim.</p>
                         <div class="row">
                             <div style="flex:1">
                                 <label for="verifyName">Player Name</label>
@@ -229,54 +234,64 @@
                                 <label for="verifyCardID">Card ID</label>
                                 <input id="verifyCardID" class="input mono" placeholder="e.g., 32D56" />
                             </div>
+                            <div style="flex:1">
+                                <label for="verifyGameKey">Game Key</label>
+                                <input id="verifyGameKey" class="input mono" placeholder="e.g., secret-key" />
+                            </div>
                         </div>
                         <div class="row" style="margin-top:10px">
                             <button class="btn" onclick="verifyCardID()">Verify</button>
                         </div>
                         <div id="verificationStatus" class="callout" style="margin-top:12px; display:none;"></div>
                     </div>
-                    </section>
+                </section>
             </div>
 
-            <aside class="card panel" id="right">
-                <h3 style="margin:0 0 8px 0">E‑Transfer Details</h3>
-                <p class="muted" style="margin:0 0 12px 0">Customize this box. Players pay before generating a card.</p>
+            <aside class="card panel">
+                <h3 style="margin:0 0 8px 0">Prize Calculator</h3>
+                <p class="muted" style="margin:0 0 10px 0">Use this to show players the total prize pot based on your game's rules.</p>
                 <div class="row">
                     <div style="flex:1">
-                        <label for="payeeName">Payee Name</label>
-                        <input id="payeeName" class="input" placeholder="Your Name" value="Eri Shipping Hub" />
-                    </div>
-                </div>
-                <div class="row" style="margin-top:8px">
-                    <div style="flex:1">
-                        <label for="payeeEmail">e‑Transfer Email</label>
-                        <input id="payeeEmail" class="input mono" placeholder="you@email.com" value="pay@yourdomain.com" />
+                        <label for="playerCount">Number of Players</label>
+                        <input id="playerCount" class="input" type="number" min="1" value="10" />
                     </div>
                     <div style="flex:1">
-                        <label for="entryFee">Entry Fee (CAD)</label>
+                        <label for="entryFee">Fee per Player</label>
                         <input id="entryFee" class="input" type="number" min="1" step="1" value="5" />
                     </div>
                 </div>
-                <div class="row" style="margin-top:8px">
-                    <div style="flex:1">
-                        <label for="prizeNote">Prize Distribution</label>
-                        <input id="prizeNote" class="input" value="80% prizes • 20% host" />
-                    </div>
+                <div class="callout" style="margin-top:12px; text-align:center;">
+                    <p class="muted" style="margin:0">Total Prize Money (80% of pot)</p>
+                    <div id="prizePot" class="prize-display">$0.00</div>
                 </div>
-                <div class="callout" style="margin-top:12px">
-                    <div><b>How to Pay</b></div>
-                    <ol style="margin:8px 0 0 18px; color:var(--muted)">
-                        <li>Open your banking app → Interac e‑Transfer.</li>
-                        <li>Recipient: <span id="showEmail" class="mono">pay@yourdomain.com</span></li>
-                        <li>Amount: <span id="showFee" class="mono">$5</span> CAD per card.</li>
-                        <li>Message: <span class="mono">BINGO <span id="showGame">(Game ID)</span> + Your Name</span></li>
-                    </ol>
-                </div>
-                <div class="row" style="margin-top:12px">
-                    <button class="btn" onclick="copyPayment()">Copy Payment Info</button>
-                    <button class="btn secondary" onclick="openModal('policyModal')">Policy</button>
-                </div>
+                <p class="muted" style="margin-top:12px; text-align:center;">20% of the total pot is a service fee for the host.</p>
             </aside>
+        </div>
+
+        <div class="card panel" style="margin-top:16px;">
+            <h3 style="margin:0 0 8px 0">Community & Details</h3>
+            <p class="muted" style="margin:0 0 12px 0">This app is made to support your community game nights. You can use this space to add your own details.</p>
+            
+            <div class="callout">
+                <div><b>How to Pay</b></div>
+                <ol style="margin:8px 0 0 18px; color:var(--muted)">
+                    <li>Open your banking app → Interac e‑Transfer.</li>
+                    <li>Recipient: **Your Name**</li>
+                    <li>Amount: **Your Price** CAD per card.</li>
+                    <li>Message: **BINGO + Your Name**</li>
+                </ol>
+            </div>
+            
+            <div class="callout" style="margin-top:12px">
+                <b>Contact Info</b>
+                <p class="muted" style="margin-top:6px;">
+                    For questions or to claim your prize, contact the host.
+                    <br>
+                    Email: your-email@example.com
+                    <br>
+                    Phone: (555) 555-5555
+                </p>
+            </div>
         </div>
 
         <p class="muted" style="margin:18px 6px 0">Built for small community games. Do not use for unlawful gambling. See Policy.</p>
@@ -307,6 +322,10 @@
     </dialog>
 
     <script>
+        // This is the secret master key that players must enter to play.
+        const HOST_GAME_KEY = "my-secret-key-123";
+        // To change it, update the value above.
+
         const $ = sel => document.querySelector(sel);
         const $$ = sel => Array.from(document.querySelectorAll(sel));
 
@@ -333,36 +352,16 @@
             $("#hostView").classList.toggle('hidden', tab !== 'host');
         }
 
-        function updatePaymentPreview() {
-            $("#showEmail").textContent = $("#payeeEmail").value.trim() || 'you@email.com';
-            $("#showFee").textContent = `$${($("#entryFee").value || '0')}`;
-            const gid = $("#hostGameId").value.trim() || $("#gameId").value.trim() || '—';
-            $("#showGame").textContent = gid;
-            localStorage.setItem('qb_payee', JSON.stringify({
-                name: $("#payeeName").value,
-                email: $("#payeeEmail").value,
-                fee: $("#entryFee").value,
-                prize: $("#prizeNote").value
-            }));
+        function calculatePrize() {
+            const players = parseFloat($("#playerCount").value) || 0;
+            const fee = parseFloat($("#entryFee").value) || 0;
+            const prize = (players * fee * 0.80).toFixed(2);
+            $("#prizePot").textContent = `$${prize}`;
         }
 
-        $$("#payeeName, #payeeEmail, #entryFee, #prizeNote").forEach(el => {
-            el.addEventListener('input', updatePaymentPreview);
+        $$("#playerCount, #entryFee").forEach(el => {
+            el.addEventListener('input', calculatePrize);
         });
-
-        function copyPayment() {
-            const pay = {
-                name: $("#payeeName").value.trim(),
-                email: $("#payeeEmail").value.trim(),
-                fee: $("#entryFee").value.trim(),
-                prize: $("#prizeNote").value.trim(),
-                game: $("#hostGameId").value.trim() || $("#gameId").value.trim()
-            };
-            const txt = `Interac e‑Transfer\nRecipient: ${pay.name} <${pay.email}>\nAmount: $${pay.fee} CAD per card\nMessage: BINGO ${pay.game || ''} + Your Name\nPrize: ${pay.prize}`;
-            navigator.clipboard.writeText(txt).then(() => {
-                toast('Payment info copied');
-            });
-        }
 
         function toast(msg) {
             const t = document.createElement('div');
@@ -387,8 +386,25 @@
             called: new Set(),
             gridEl: $("#cardGrid"),
             cardID: null,
-            playerName: null
+            playerName: null,
+            gameKey: null
         };
+
+        function checkPlayerInputs() {
+            const gid = $("#gameId").value.trim();
+            const gameKey = $("#gameKey").value.trim();
+            const valid = gid.length > 0 && gameKey.length > 0 && gameKey === HOST_GAME_KEY;
+            $("#generateBtn").disabled = !valid;
+            if(!valid) {
+                 $("#cardDetails").innerHTML = `Please enter a valid Game ID and Game Key.`;
+            } else {
+                 $("#cardDetails").innerHTML = `Press Generate Card to begin!`;
+            }
+        }
+
+        $$("#gameId, #gameKey").forEach(el => {
+            el.addEventListener('input', checkPlayerInputs);
+        });
 
         function buildRanges() {
             return [
@@ -411,6 +427,8 @@
         function generateCard() {
             const name = $("#playerName").value.trim();
             const gid = $("#gameId").value.trim();
+            const gameKey = $("#gameKey").value.trim();
+
             if (!name || name.length < 2) {
                 toast('Please enter your name');
                 return;
@@ -419,14 +437,19 @@
                 toast('Please enter a Game ID');
                 return;
             }
+            if (!gameKey || gameKey.length < 2) {
+                toast('Please enter the Game Key');
+                return;
+            }
             
             $("#generateBtn").disabled = true;
 
-            const cardDataString = `${name}|${gid}`;
+            const cardDataString = `${name}|${gid}|${gameKey}`;
             const cardID = btoa(cardDataString).toUpperCase().substring(0, 5);
 
             cardState.cardID = cardID;
             cardState.playerName = name;
+            cardState.gameKey = gameKey;
 
             const ranges = buildRanges();
             const columns = [
@@ -467,6 +490,7 @@
             localStorage.setItem('qb_player', JSON.stringify({
                 name,
                 gid,
+                gameKey,
                 cardID
             }));
             toast('Card generated');
@@ -480,6 +504,7 @@
             $("#cardDetails").innerHTML = '';
             cardState.cardID = null;
             cardState.playerName = null;
+            cardState.gameKey = null;
             $("#generateBtn").disabled = false;
             toast('Card and player data reset.');
         }
@@ -537,6 +562,7 @@
         function claimBingo() {
             const name = cardState.playerName || $("#playerName").value.trim() || 'Player';
             const gid = $("#gameId").value.trim() || '—';
+            const gameKey = cardState.gameKey || $("#gameKey").value.trim() || '—';
             const cardID = cardState.cardID || '—';
             const {
                 lines,
@@ -547,7 +573,7 @@
                 toast('You don\'t have a winning pattern yet!');
                 return;
             }
-            const msg = `BINGO CLAIM\nName: ${name}\nGame: ${gid}\nCard ID: ${cardID}\nStatus: ${tier}`;
+            const msg = `BINGO CLAIM\nName: ${name}\nGame ID: ${gid}\nGame Key: ${gameKey}\nCard ID: ${cardID}\nStatus: ${tier}`;
             navigator.clipboard.writeText(msg).then(() => toast('Claim copied. Paste in chat + send screenshot.'));
         }
 
@@ -578,82 +604,76 @@
             toast('Cleared');
         }
 
+        function downloadCardPNG() {
+            if (cardState.cells.length !== 25) {
+                toast('Generate a card first');
+                return;
+            }
 
+            const scale = 4, size = 500, pad = 20;
+            const c = document.createElement('canvas');
+            c.width = size * scale;
+            c.height = size * scale;
+            const ctx = c.getContext('2d');
+            ctx.scale(scale, scale);
 
-    function downloadCardPNG() {
-        if (cardState.cells.length !== 25) {
-            toast('Generate a card first');
-            return;
-        }
+            ctx.fillStyle = '#0b1020';
+            ctx.fillRect(0, 0, size, size);
+            ctx.fillStyle = '#ffffff';
+            ctx.globalAlpha = .08;
+            ctx.fillRect(0, 0, size, size);
+            ctx.globalAlpha = 1;
 
-        const scale = 4, size = 500, pad = 20;
-        const c = document.createElement('canvas');
-        c.width = size * scale;
-        c.height = size * scale;
-        const ctx = c.getContext('2d');
-        ctx.scale(scale, scale);
-
-        // Background
-        ctx.fillStyle = '#0b1020';
-        ctx.fillRect(0, 0, size, size);
-        ctx.fillStyle = '#ffffff';
-        ctx.globalAlpha = .08;
-        ctx.fillRect(0, 0, size, size);
-        ctx.globalAlpha = 1;
-
-        // Card Details (NEW)
-        ctx.font = 'bold 16px Inter';
-        ctx.fillStyle = '#cfd8ff';
-        ctx.textAlign = 'left';
-        const name = cardState.playerName || 'Player';
-        const gid = $("#gameId").value.trim() || '—';
-        const cardID = cardState.cardID || '—';
-        ctx.fillText(`Game: ${gid}  |  Player: ${name}`, pad, pad + 18);
-        ctx.fillText(`Card ID: ${cardID}`, pad, pad + 38);
-
-        // Bingo Headings (B, I, N, G, O)
-        const headers = ['B', 'I', 'N', 'G', 'O'];
-        const headerY = pad + 60; // Adjusted for new text
-        for (let i = 0; i < 5; i++) {
+            ctx.font = 'bold 16px Inter';
             ctx.fillStyle = '#cfd8ff';
-            ctx.font = 'bold 26px Inter';
-            ctx.textAlign = 'center';
-            ctx.fillText(headers[i], pad + (i + 0.5) * (size - pad * 2) / 5, headerY);
-        }
+            ctx.textAlign = 'left';
+            const name = cardState.playerName || 'Player';
+            const gid = $("#gameId").value.trim() || '—';
+            const cardID = cardState.cardID || '—';
+            const gameKey = cardState.gameKey || $("#gameKey").value.trim() || '—';
+            
+            ctx.fillText(`Game: ${gid} | Key: ${gameKey}`, pad, pad + 18);
+            ctx.fillText(`Player: ${name} | Card ID: ${cardID}`, pad, pad + 38);
 
-        // Bingo Grid
-        const cell = (size - pad * 2) / 5;
-        const gridY = headerY + 16;
-        for (let r = 0; r < 5; r++) {
-            for (let cidx = 0; cidx < 5; cidx++) {
-                const i = r * 5 + cidx;
-                const val = cardState.cells[i].n;
-                const x = pad + (cidx + 0.5) * cell;
-                const y = gridY + (r + 1) * cell - 12;
+            const headers = ['B', 'I', 'N', 'G', 'O'];
+            const headerY = pad + 60;
+            for (let i = 0; i < 5; i++) {
+                ctx.fillStyle = '#cfd8ff';
+                ctx.font = 'bold 26px Inter';
+                ctx.textAlign = 'center';
+                ctx.fillText(headers[i], pad + (i + 0.5) * (size - pad * 2) / 5, headerY);
+            }
 
-                ctx.strokeStyle = 'rgba(255,255,255,.25)';
-                ctx.strokeRect(pad + cidx * cell, gridY + r * cell, cell, cell);
+            const cell = (size - pad * 2) / 5;
+            const gridY = headerY + 16;
+            for (let r = 0; r < 5; r++) {
+                for (let cidx = 0; cidx < 5; cidx++) {
+                    const i = r * 5 + cidx;
+                    const val = cardState.cells[i].n;
+                    const x = pad + (cidx + 0.5) * cell;
+                    const y = gridY + (r + 1) * cell - 12;
 
-                if (val === 'FREE') {
-                    ctx.fillStyle = '#9ef0ff';
-                    ctx.font = 'bold 18px Inter';
-                    ctx.fillText('FREE', x, y);
-                } else {
-                    ctx.fillStyle = '#ffffff';
-                    ctx.font = 'bold 20px Inter';
-                    ctx.fillText(String(val), x, y);
+                    ctx.strokeStyle = 'rgba(255,255,255,.25)';
+                    ctx.strokeRect(pad + cidx * cell, gridY + r * cell, cell, cell);
+
+                    if (val === 'FREE') {
+                        ctx.fillStyle = '#9ef0ff';
+                        ctx.font = 'bold 18px Inter';
+                        ctx.fillText('FREE', x, y);
+                    } else {
+                        ctx.fillStyle = '#ffffff';
+                        ctx.font = 'bold 20px Inter';
+                        ctx.fillText(String(val), x, y);
+                    }
                 }
             }
+
+            const url = c.toDataURL('image/png');
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'bingo-card.png';
+            a.click();
         }
-
-        // Download
-        const url = c.toDataURL('image/png');
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'bingo-card.png';
-        a.click();
-    }
-
 
         const caller = {
             deck: [],
@@ -686,7 +706,6 @@
             $("#btnUndo").disabled = true;
             $("#btnExport").disabled = true;
             $("#history").textContent = '';
-            updatePaymentPreview();
             toast('Caller ready');
         }
 
@@ -737,9 +756,7 @@
 
         function copyShare() {
             const gid = $("#hostGameId").value.trim();
-            const fee = $("#entryFee").value.trim();
-            const email = $("#payeeEmail").value.trim();
-            const txt = `Join HABESHA BINGO!\nGame ID: ${gid}\nEntry: $${fee} via e‑Transfer → ${email}\nHow to play: go to the site, choose Player, enter Game ID, generate card, and join the stream.`;
+            const txt = `Join HABESHA BINGO!\nGame ID: ${gid}\nHow to play: go to the site, choose Player, enter Game ID, and join the stream.`;
             navigator.clipboard.writeText(txt).then(() => toast('Share text copied'));
         }
 
@@ -754,26 +771,18 @@
         }
 
         function loadPrefs() {
-            const pay = JSON.parse(localStorage.getItem('qb_payee') || 'null');
-            if (pay) {
-                $("#payeeName").value = pay.name || '';
-                $("#payeeEmail").value = pay.email || '';
-                $("#entryFee").value = pay.fee || '';
-                $("#prizeNote").value = pay.prize || '';
-            }
-            updatePaymentPreview();
-
             const p = JSON.parse(localStorage.getItem('qb_player') || 'null');
             if (p) {
                 $("#playerName").value = p.name || '';
                 $("#gameId").value = p.gid || '';
+                $("#gameKey").value = p.gameKey || '';
                 if (p.cardID) {
-                    generateCardFromSeed(p.cardID, p.name, p.gid);
+                    generateCardFromSeed(p.cardID, p.name, p.gid, p.gameKey);
                 }
             }
         }
 
-        function generateCardFromSeed(cardID, name, gid) {
+        function generateCardFromSeed(cardID, name, gid, gameKey) {
             const ranges = buildRanges();
             const columns = [
                 generateColumn(ranges[0], 5),
@@ -810,26 +819,31 @@
             }
             cardState.cardID = cardID;
             cardState.playerName = name;
+            cardState.gameKey = gameKey;
             $("#cardDetails").innerHTML = `<b>Game ID:</b> ${gid} • <b>Player:</b> ${name} • <b>Card ID:</b> <span class="mono">${cardID}</span>`;
             updateStatus();
             $("#generateBtn").disabled = true;
         }
 
-        // NEW VERIFICATION FUNCTION
         function verifyCardID() {
             const verifyName = $("#verifyName").value.trim();
             const verifyID = $("#verifyCardID").value.trim().toUpperCase();
             const hostGameId = $("#hostGameId").value.trim();
+            const verifyGameKey = $("#verifyGameKey").value.trim();
 
             const statusEl = $("#verificationStatus");
             statusEl.style.display = 'block';
 
-            if (!verifyName || !verifyID || !hostGameId) {
+            if (!verifyName || !verifyID || !hostGameId || !verifyGameKey) {
                 statusEl.innerHTML = '<span style="color:var(--danger)">Please fill out all fields.</span>';
                 return;
             }
+            if (verifyGameKey !== HOST_GAME_KEY) {
+                statusEl.innerHTML = '<span style="color:var(--danger)">❌ INVALID GAME KEY.</span>';
+                return;
+            }
 
-            const cardDataString = `${verifyName}|${hostGameId}`;
+            const cardDataString = `${verifyName}|${hostGameId}|${verifyGameKey}`;
             const generatedCardID = btoa(cardDataString).toUpperCase().substring(0, 5);
             
             if (generatedCardID === verifyID) {
@@ -842,10 +856,11 @@
         function onReady() {
             loadPrefs();
             renderBoard();
+            checkPlayerInputs();
+            calculatePrize();
         }
 
         document.addEventListener('DOMContentLoaded', onReady);
     </script>
 </body>
 </html>
-
